@@ -44,9 +44,8 @@ export const SignIn: React.FC<AuthProps> = ({ onNavigate, onLogin }) => {
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div>
             <Button type="button" variant="outline" className="w-full text-sm">Google</Button>
-            <Button type="button" variant="outline" className="w-full text-sm">Apple</Button>
           </div>
           
           <p className="text-center text-sm text-gray-600">

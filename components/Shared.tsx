@@ -1,0 +1,169 @@
+import React, { useState } from 'react';
+import { Page } from '../types';
+
+interface LayoutProps {
+  children: React.ReactNode;
+  activePage: Page;
+  onNavigate: (page: Page, params?: any) => void;
+}
+
+export const Header: React.FC<{ onNavigate: (page: Page) => void; cartCount: number }> = ({ onNavigate, cartCount }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+      <div className="max-w-[1920px] mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center gap-4 cursor-pointer" onClick={() => onNavigate(Page.HOME)}>
+          <span className="material-symbols-outlined text-3xl">all_inclusive</span>
+          <h1 className="text-2xl font-bold tracking-tighter font-serif">Andal Clothing</h1>
+        </div>
+
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-8">
+          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">New Arrivals</button>
+          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">Agbadas</button>
+          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">Jalabiyas</button>
+          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">Caps</button>
+          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">Fabrics</button>
+          <button onClick={() => onNavigate(Page.JOURNAL)} className="text-sm font-medium hover:text-gray-500 transition-colors">Journal</button>
+        </nav>
+
+        {/* Icons */}
+        <div className="flex items-center gap-4">
+          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <span className="material-symbols-outlined">search</span>
+          </button>
+          <button onClick={() => onNavigate(Page.ACCOUNT)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <span className="material-symbols-outlined">person</span>
+          </button>
+          <button onClick={() => onNavigate(Page.CART)} className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
+            <span className="material-symbols-outlined">shopping_bag</span>
+            {cartCount > 0 && (
+              <span className="absolute top-1 right-0 bg-black text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </button>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 p-6 flex flex-col gap-4 shadow-lg">
+          <button onClick={() => { onNavigate(Page.SHOP); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Agbadas</button>
+          <button onClick={() => { onNavigate(Page.SHOP); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Jalabiyas</button>
+          <button onClick={() => { onNavigate(Page.SHOP); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Caps (Fila)</button>
+          <button onClick={() => { onNavigate(Page.SHOP); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Fabrics</button>
+          <button onClick={() => { onNavigate(Page.JOURNAL); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Journal</button>
+          <button onClick={() => { onNavigate(Page.ABOUT); setIsMenuOpen(false); }} className="text-left text-lg font-medium">About</button>
+          <button onClick={() => { onNavigate(Page.ACCOUNT); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Account</button>
+        </div>
+      )}
+    </header>
+  );
+};
+
+export const Footer: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavigate }) => {
+  return (
+    <footer className="bg-[#111111] text-white pt-20 pb-10">
+      <div className="max-w-[1920px] mx-auto px-6 md:px-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="material-symbols-outlined text-2xl">all_inclusive</span>
+              <span className="text-xl font-bold font-serif">Andal Clothing</span>
+            </div>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Timeless elegance for the modern man. 
+              Authentic Hausa craftsmanship, premium fabrics, and royal aesthetics.
+            </p>
+          </div>
+          
+          <div>
+            <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Collections</h4>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.SHOP); }} className="hover:text-white transition-colors">Royal Agbadas</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.SHOP); }} className="hover:text-white transition-colors">Premium Jalabiyas</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.SHOP); }} className="hover:text-white transition-colors">Hand-Woven Caps</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Luxury Fabrics</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Company</h4>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.ABOUT); }} className="hover:text-white transition-colors">Our Heritage</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.SUSTAINABILITY); }} className="hover:text-white transition-colors">Sustainability</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.CAREERS); }} className="hover:text-white transition-colors">Careers</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.PRESS); }} className="hover:text-white transition-colors">Press</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Support</h4>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.CONTACT); }} className="hover:text-white transition-colors">Contact Us</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Shipping & Returns</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Care Instructions</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Size Guide</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+          <p>© 2024 Andal Clothing. All rights reserved.</p>
+          <div className="flex gap-6">
+            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'outline' }> = ({ 
+  className = '', 
+  variant = 'primary', 
+  children, 
+  ...props 
+}) => {
+  const baseStyles = "h-12 px-8 rounded font-medium transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed";
+  const variants = {
+    primary: "bg-primary text-white hover:bg-black",
+    secondary: "bg-white text-primary hover:bg-gray-50",
+    outline: "border border-primary text-primary hover:bg-primary hover:text-white"
+  };
+
+  return (
+    <button className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
+      {children}
+    </button>
+  );
+};
+
+export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ className = '', ...props }) => (
+  <input 
+    className={`w-full h-12 px-4 bg-white border border-gray-200 rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors ${className}`} 
+    {...props} 
+  />
+);
+
+export const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate }) => {
+  // Mock cart count
+  const cartCount = 2; 
+
+  return (
+    <div className="min-h-screen flex flex-col bg-white">
+      <Header onNavigate={onNavigate} cartCount={cartCount} />
+      <main className="flex-grow animate-fade-in">
+        {children}
+      </main>
+      <Footer onNavigate={onNavigate} />
+    </div>
+  );
+};

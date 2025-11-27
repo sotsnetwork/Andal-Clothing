@@ -115,8 +115,8 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
       {/* Hero Section */}
       <section className="relative h-[90vh] w-full flex items-center justify-center bg-gray-900 text-white">
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/andal.jpg')" }}
+          className="absolute inset-0 bg-cover"
+          style={{ backgroundImage: "url('/andal.jpg')", backgroundPosition: "center top" }}
         ></div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80"></div>
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">

@@ -294,9 +294,9 @@ export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void;
                 </>
               ) : (
                 <div className="animate-fade-in">
-                  <button onClick={() => setSelectedOrder(null)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-black mb-6">
+                  <Button variant="outline" onClick={() => setSelectedOrder(null)} className="mb-6 flex items-center gap-2 px-4 h-10 w-auto">
                     <span className="material-symbols-outlined text-lg">arrow_back</span> Back to Orders
-                  </button>
+                  </Button>
                   <div className="flex flex-col md:flex-row justify-between items-start mb-8">
                     <div>
                       <h1 className="text-3xl font-bold mb-2">Order {selectedOrder.id}</h1>

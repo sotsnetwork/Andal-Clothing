@@ -37,12 +37,12 @@ export const Header: React.FC<{ onNavigate: (page: Page, params?: any) => void; 
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            <button onClick={() => onNavigate(Page.SHOP, { category: 'New Arrivals' })} className="text-sm font-medium hover:text-gray-500 transition-colors">New Arrivals</button>
-            <button onClick={() => onNavigate(Page.SHOP, { category: 'Agbadas' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Agbadas</button>
-            <button onClick={() => onNavigate(Page.SHOP, { category: 'Jalabiyas' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Jalabiyas</button>
-            <button onClick={() => onNavigate(Page.SHOP, { category: 'Caps' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Caps</button>
-            <button onClick={() => onNavigate(Page.SHOP, { category: 'Fabrics' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Fabrics</button>
-            <button onClick={() => onNavigate(Page.JOURNAL)} className="text-sm font-medium hover:text-gray-500 transition-colors">Journal</button>
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'New Arrivals' })} className="text-base font-medium hover:text-gray-500 transition-colors">New Arrivals</button>
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'Agbadas' })} className="text-base font-medium hover:text-gray-500 transition-colors">Agbadas</button>
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'Jalabiyas' })} className="text-base font-medium hover:text-gray-500 transition-colors">Jalabiyas</button>
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'Caps' })} className="text-base font-medium hover:text-gray-500 transition-colors">Caps</button>
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'Fabrics' })} className="text-base font-medium hover:text-gray-500 transition-colors">Fabrics</button>
+            <button onClick={() => onNavigate(Page.JOURNAL)} className="text-base font-medium hover:text-gray-500 transition-colors">Journal</button>
           </nav>
 
           {/* Icons */}

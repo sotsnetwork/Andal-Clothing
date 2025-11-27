@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [page, setPage] = useState<Page>(Page.HOME);
   const [params, setParams] = useState<any>({});
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   
@@ -38,13 +39,17 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = (userData?: { name: string; email: string }) => {
     setIsAuthenticated(true);
+    if (userData) {
+      setUser(userData);
+    }
     navigate(Page.ACCOUNT);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setUser(null);
     navigate(Page.HOME);
   };
 
@@ -203,6 +208,7 @@ const App: React.FC = () => {
           onLogout={handleLogout} 
           wishlist={wishlist}
           toggleWishlist={toggleWishlist}
+          user={user}
         />
       )}
       {page === Page.ABOUT && <About />}
@@ -221,7 +227,7 @@ const App: React.FC = () => {
 
       {/* Auth Pages */}
       {page === Page.LOGIN && <SignIn onNavigate={navigate} onLogin={handleLogin} />}
-      {page === Page.SIGNUP && <SignUp onNavigate={navigate} onLogin={handleLogin} />}
+      {page === Page.SIGNUP && <SignUp onNavigate={navigate} onLogin={handleLogin} user={user} />}
       {page === Page.FORGOT_PASSWORD && <ForgotPassword onNavigate={navigate} />}
       {page === Page.NEW_PASSWORD && <NewPassword onNavigate={navigate} />}
     </Layout>

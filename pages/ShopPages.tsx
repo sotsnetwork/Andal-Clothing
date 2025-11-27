@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Product, Page, CartItem } from '../types';
 import { Button } from '../components/Shared';
@@ -20,7 +21,7 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
     <div>
       {/* Hero Section */}
       <section className="relative h-[90vh] w-full flex items-center justify-center bg-gray-900 text-white">
-        <div className="absolute inset-0 bg-[url('https://placehold.co/1920x1080/111/333?text=Andal+Clothing+Hero')] bg-cover bg-center opacity-60"></div>
+        <div className="absolute inset-0 bg-[url('https://placehold.co/1920x1080/172554/FFF?text=Man+in+Blue+Agbada')] bg-cover bg-center opacity-70"></div>
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <h1 className="text-6xl md:text-8xl font-serif font-bold mb-6 leading-tight tracking-tight">The Essence of Nobility</h1>
           <p className="text-lg md:text-xl mb-10 font-light opacity-90 max-w-2xl mx-auto">Elevate your presence with our premium collection of Agbadas, Jalabiyas, and authentic hand-woven caps.</p>
@@ -415,4 +416,24 @@ export const CheckoutSuccess: React.FC<{ onNavigate: (page: Page, params?: any) 
              <span>${PRODUCTS[0].price}.00</span>
            </div>
            <div className="flex gap-4">
-             <img src={PRODUCTS[5].image} className="
+             <img src={PRODUCTS[5].image} className="w-16 h-16 object-cover rounded" />
+             <div className="flex-1">
+                <p className="font-medium">{PRODUCTS[5].name}</p>
+                <p className="text-sm text-gray-400">Color: Classic Grey</p>
+             </div>
+             <span>${PRODUCTS[5].price}.00</span>
+           </div>
+        </div>
+        <div className="border-t border-white/10 mt-6 pt-4 flex justify-between font-bold text-lg">
+          <span>Total</span>
+          <span>${PRODUCTS[0].price + PRODUCTS[5].price}.00</span>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+        <Button onClick={() => {}} className="flex-1 bg-blue-600 hover:bg-blue-700">Track Your Order</Button>
+        <Button onClick={() => onNavigate(Page.SHOP)} className="flex-1 bg-transparent border border-white/20 text-white hover:bg-white/10">Continue Shopping</Button>
+      </div>
+    </div>
+  );
+};

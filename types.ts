@@ -27,4 +27,9 @@ export enum Page {
   SUSTAINABILITY = 'sustainability',
   CAREERS = 'careers',
   PRESS = 'press',
+  // Auth Pages
+  LOGIN = 'login',
+  SIGNUP = 'signup',
+  FORGOT_PASSWORD = 'forgot_password',
+  NEW_PASSWORD = 'new_password',
 }

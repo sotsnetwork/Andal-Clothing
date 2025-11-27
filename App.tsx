@@ -4,6 +4,7 @@ import { Layout } from './components/Shared';
 import { Home, Shop, ProductDetail, Cart, CheckoutSuccess } from './pages/ShopPages';
 import { About, Journal, Sustainability, Careers, HelpCenter } from './pages/Content';
 import { Account, Contact, Press } from './pages/Support';
+import { SignIn, SignUp, ForgotPassword, NewPassword } from './pages/Auth';
 
 const App: React.FC = () => {
   const [page, setPage] = useState<Page>(Page.HOME);
@@ -12,7 +13,12 @@ const App: React.FC = () => {
   const navigate = (newPage: Page, newParams?: any) => {
     window.scrollTo(0, 0);
     setPage(newPage);
-    if (newParams) setParams(newParams);
+    if (newParams) {
+        setParams(newParams);
+    } else {
+        // Reset params if none provided (important for category filtering clearing)
+        setParams({});
+    }
   };
 
   // Simple hash router simulation for refresh persistence
@@ -50,17 +56,24 @@ const App: React.FC = () => {
   return (
     <Layout activePage={page} onNavigate={navigate}>
       {page === Page.HOME && <Home onNavigate={navigate} />}
-      {page === Page.SHOP && <Shop onNavigate={navigate} />}
+      {page === Page.SHOP && <Shop onNavigate={navigate} params={params} />}
       {page === Page.PRODUCT && <ProductDetail id={params.id} onNavigate={navigate} />}
       {page === Page.CART && <Cart onNavigate={navigate} />}
       {page === Page.CHECKOUT_SUCCESS && <CheckoutSuccess onNavigate={navigate} />}
-      {page === Page.ACCOUNT && <Account />}
+      {page === Page.ACCOUNT && <Account onNavigate={navigate} params={params} />}
       {page === Page.ABOUT && <About />}
       {page === Page.CONTACT && <Contact />}
       {page === Page.JOURNAL && <Journal />}
       {page === Page.SUSTAINABILITY && <Sustainability />}
       {page === Page.CAREERS && <Careers />}
       {page === Page.PRESS && <Press />}
+      
+      {/* Auth Pages */}
+      {page === Page.LOGIN && <SignIn onNavigate={navigate} />}
+      {page === Page.SIGNUP && <SignUp onNavigate={navigate} />}
+      {page === Page.FORGOT_PASSWORD && <ForgotPassword onNavigate={navigate} />}
+      {page === Page.NEW_PASSWORD && <NewPassword onNavigate={navigate} />}
+
       {/* Basic Fallbacks for unimplemented distinct pages */}
       {(page !== Page.HOME && 
         page !== Page.SHOP && 
@@ -73,7 +86,11 @@ const App: React.FC = () => {
         page !== Page.JOURNAL &&
         page !== Page.SUSTAINABILITY &&
         page !== Page.CAREERS &&
-        page !== Page.PRESS
+        page !== Page.PRESS &&
+        page !== Page.LOGIN &&
+        page !== Page.SIGNUP &&
+        page !== Page.FORGOT_PASSWORD &&
+        page !== Page.NEW_PASSWORD
        ) && (
         <div className="flex items-center justify-center h-[50vh]">
           <div className="text-center">

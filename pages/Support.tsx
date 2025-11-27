@@ -3,86 +3,210 @@ import { Page } from '../types';
 import { Button, Input } from '../components/Shared';
 
 // --- ACCOUNT PAGE ---
-export const Account: React.FC = () => (
-  <div className="flex min-h-[80vh] bg-gray-50">
-    <aside className="w-64 bg-white border-r border-gray-200 hidden md:block">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-             <span className="material-symbols-outlined text-gray-500">person</span>
-          </div>
-          <div>
-            <p className="font-bold text-sm">Ibrahim Al-Fayed</p>
-            <p className="text-xs text-gray-500">ibrahim@email.com</p>
+export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void; params?: any }> = ({ onNavigate, params }) => {
+  const currentView = params?.view || 'profile';
+
+  return (
+    <div className="flex min-h-[80vh] bg-gray-50">
+      <aside className="w-64 bg-white border-r border-gray-200 hidden md:block">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+               <span className="material-symbols-outlined text-gray-500">person</span>
+            </div>
+            <div>
+              <p className="font-bold text-sm">Ibrahim Al-Fayed</p>
+              <p className="text-xs text-gray-500">ibrahim@email.com</p>
+            </div>
           </div>
         </div>
-      </div>
-      <nav className="p-4 space-y-1">
-        <a href="#" className="flex items-center gap-3 px-4 py-3 bg-gray-100 rounded-lg font-medium text-sm text-black"><span className="material-symbols-outlined text-xl">person</span> Account Settings</a>
-        <a href="#" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg font-medium text-sm text-gray-600"><span className="material-symbols-outlined text-xl">shopping_bag</span> My Orders</a>
-        <a href="#" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg font-medium text-sm text-gray-600"><span className="material-symbols-outlined text-xl">home</span> Addresses</a>
-        <a href="#" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg font-medium text-sm text-gray-600"><span className="material-symbols-outlined text-xl">credit_card</span> Payment Methods</a>
-        <a href="#" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg font-medium text-sm text-gray-600 mt-10"><span className="material-symbols-outlined text-xl">logout</span> Logout</a>
-      </nav>
-    </aside>
+        <nav className="p-4 space-y-1">
+          <button 
+            onClick={() => onNavigate(Page.ACCOUNT, { view: 'profile' })}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm text-left ${currentView === 'profile' ? 'bg-gray-100 text-black' : 'text-gray-600 hover:bg-gray-50'}`}
+          >
+            <span className="material-symbols-outlined text-xl">person</span> Account Settings
+          </button>
+          <button 
+            onClick={() => onNavigate(Page.ACCOUNT, { view: 'orders' })}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm text-left ${currentView === 'orders' ? 'bg-gray-100 text-black' : 'text-gray-600 hover:bg-gray-50'}`}
+          >
+            <span className="material-symbols-outlined text-xl">shopping_bag</span> My Orders
+          </button>
+          <button 
+            onClick={() => onNavigate(Page.ACCOUNT, { view: 'addresses' })}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm text-left ${currentView === 'addresses' ? 'bg-gray-100 text-black' : 'text-gray-600 hover:bg-gray-50'}`}
+          >
+            <span className="material-symbols-outlined text-xl">home</span> Addresses
+          </button>
+          <button 
+            onClick={() => onNavigate(Page.ACCOUNT, { view: 'payments' })}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm text-left ${currentView === 'payments' ? 'bg-gray-100 text-black' : 'text-gray-600 hover:bg-gray-50'}`}
+          >
+            <span className="material-symbols-outlined text-xl">credit_card</span> Payment Methods
+          </button>
+          <button 
+            onClick={() => onNavigate(Page.LOGIN)}
+            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg font-medium text-sm text-gray-600 mt-10 text-left"
+          >
+            <span className="material-symbols-outlined text-xl">logout</span> Logout
+          </button>
+        </nav>
+      </aside>
 
-    <div className="flex-1 p-8 md:p-12">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
-        
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
-            <h2 className="text-sm text-gray-500 mb-2">Personal Information</h2>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold text-lg">Ibrahim Al-Fayed</p>
-                <p className="text-gray-500">ibrahim@email.com</p>
-              </div>
-              <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium">Edit</button>
-            </div>
-          </div>
+      <div className="flex-1 p-8 md:p-12">
+        <div className="max-w-4xl mx-auto">
+          {/* Profile View */}
+          {currentView === 'profile' && (
+            <>
+              <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-xl border border-gray-200">
+                  <h2 className="text-sm text-gray-500 mb-2">Personal Information</h2>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-bold text-lg">Ibrahim Al-Fayed</p>
+                      <p className="text-gray-500">ibrahim@email.com</p>
+                    </div>
+                    <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium">Edit</button>
+                  </div>
+                </div>
 
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
-            <h2 className="text-sm text-gray-500 mb-2">Password</h2>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold text-lg tracking-widest">••••••••••••</p>
-                <p className="text-gray-500 text-sm">Last changed 3 months ago</p>
-              </div>
-              <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium">Change Password</button>
-            </div>
-          </div>
-
-          <h2 className="text-xl font-bold mt-10 mb-4">Addresses</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-xl border border-gray-200">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-bold">Default Shipping</h3>
-                <div className="flex gap-2 text-gray-400">
-                  <button className="hover:text-black"><span className="material-symbols-outlined text-lg">edit</span></button>
-                  <button className="hover:text-black"><span className="material-symbols-outlined text-lg">delete</span></button>
+                <div className="bg-white p-6 rounded-xl border border-gray-200">
+                  <h2 className="text-sm text-gray-500 mb-2">Password</h2>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-bold text-lg tracking-widest">••••••••••••</p>
+                      <p className="text-gray-500 text-sm">Last changed 3 months ago</p>
+                    </div>
+                    <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium">Change Password</button>
+                  </div>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">123 Andal Avenue<br/>Lagos<br/>Nigeria</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl border border-gray-200">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-bold">Billing Address</h3>
-                <div className="flex gap-2 text-gray-400">
-                  <button className="hover:text-black"><span className="material-symbols-outlined text-lg">edit</span></button>
-                  <button className="hover:text-black"><span className="material-symbols-outlined text-lg">delete</span></button>
+            </>
+          )}
+
+          {/* Orders View */}
+          {currentView === 'orders' && (
+            <>
+              <h1 className="text-3xl font-bold mb-8">My Orders</h1>
+              <div className="space-y-6">
+                {[
+                  { id: '#4523-23', date: 'Oct 12, 2024', status: 'Delivered', total: '$1,750.00', items: 'Royal Grand Agbada, White Jalabiya' },
+                  { id: '#4490-11', date: 'Sep 28, 2024', status: 'In Transit', total: '$450.00', items: 'Emirate Black Kaftan' },
+                  { id: '#4102-09', date: 'Aug 15, 2024', status: 'Delivered', total: '$120.00', items: 'Zanna Cap' },
+                ].map((order, i) => (
+                  <div key={i} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-sm transition-shadow">
+                    <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
+                      <div>
+                        <h3 className="font-bold text-lg">{order.id}</h3>
+                        <p className="text-sm text-gray-500">Placed on {order.date}</p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {order.status}
+                        </span>
+                        <span className="font-bold text-lg">{order.total}</span>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
+                      <p className="text-sm text-gray-600 truncate max-w-md">{order.items}</p>
+                      <button className="text-sm font-medium underline">View Details</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Addresses View */}
+          {currentView === 'addresses' && (
+            <>
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-bold">Addresses</h1>
+                <Button className="h-10 text-sm bg-black text-white">Add New Address</Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-xl border border-gray-200 relative group">
+                  <span className="absolute top-4 right-4 bg-gray-100 px-2 py-1 text-xs font-bold rounded">Default</span>
+                  <div className="mb-4">
+                     <span className="material-symbols-outlined text-gray-400 text-3xl mb-2">home</span>
+                     <h3 className="font-bold">Home</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                    Ibrahim Al-Fayed<br/>
+                    123 Andal Avenue<br/>
+                    Lekki Phase 1, Lagos<br/>
+                    Nigeria<br/>
+                    +234 800 123 4567
+                  </p>
+                  <div className="flex gap-4 pt-4 border-t border-gray-100">
+                    <button className="text-sm font-medium hover:text-black text-gray-500">Edit</button>
+                    <button className="text-sm font-medium hover:text-red-600 text-gray-500">Remove</button>
+                  </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-xl border border-gray-200 relative group">
+                  <div className="mb-4">
+                     <span className="material-symbols-outlined text-gray-400 text-3xl mb-2">work</span>
+                     <h3 className="font-bold">Office</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                    Ibrahim Al-Fayed<br/>
+                    456 Trade Center, CBD<br/>
+                    Abuja, FCT<br/>
+                    Nigeria<br/>
+                    +234 809 987 6543
+                  </p>
+                  <div className="flex gap-4 pt-4 border-t border-gray-100">
+                    <button className="text-sm font-medium hover:text-black text-gray-500">Edit</button>
+                    <button className="text-sm font-medium hover:text-red-600 text-gray-500">Remove</button>
+                  </div>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">456 Trade Center<br/>Abuja<br/>Nigeria</p>
-            </div>
-          </div>
-          
-          <Button className="w-full md:w-auto mt-4 bg-black text-white">Add New Address</Button>
+            </>
+          )}
+
+          {/* Payments View */}
+          {currentView === 'payments' && (
+            <>
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-bold">Payment Methods</h1>
+                <Button className="h-10 text-sm bg-black text-white">Add New Card</Button>
+              </div>
+              <div className="space-y-4">
+                 <div className="bg-white p-6 rounded-xl border border-gray-200 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                       <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
+                          <span className="font-bold text-xs">VISA</span>
+                       </div>
+                       <div>
+                          <p className="font-bold">Visa ending in 4242</p>
+                          <p className="text-sm text-gray-500">Expires 12/25</p>
+                       </div>
+                    </div>
+                    <span className="bg-gray-100 px-3 py-1 rounded text-xs font-bold">Default</span>
+                 </div>
+                 <div className="bg-white p-6 rounded-xl border border-gray-200 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                       <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
+                          <span className="font-bold text-xs text-orange-600">MC</span>
+                       </div>
+                       <div>
+                          <p className="font-bold">Mastercard ending in 8899</p>
+                          <p className="text-sm text-gray-500">Expires 09/26</p>
+                       </div>
+                    </div>
+                    <button className="text-sm font-medium text-gray-500 hover:text-black">Remove</button>
+                 </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // --- CONTACT PAGE ---
 export const Contact: React.FC = () => (

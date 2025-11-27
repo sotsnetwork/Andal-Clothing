@@ -54,7 +54,7 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
       {/* Categories */}
       <section className="py-10 px-6 md:px-10 max-w-[1920px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="relative h-[500px] group cursor-pointer rounded-xl overflow-hidden">
+          <div className="relative h-[500px] group cursor-pointer rounded-xl overflow-hidden" onClick={() => onNavigate(Page.SHOP, { category: 'Agbadas' })}>
             <img src="https://placehold.co/600x800/222/FFF?text=Agbada+Collection" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors"></div>
             <div className="absolute bottom-10 left-10 text-white">
@@ -62,7 +62,7 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
               <span className="text-sm font-medium border-b border-white pb-1">Shop Ceremonial</span>
             </div>
           </div>
-          <div className="relative h-[500px] group cursor-pointer rounded-xl overflow-hidden">
+          <div className="relative h-[500px] group cursor-pointer rounded-xl overflow-hidden" onClick={() => onNavigate(Page.SHOP, { category: 'Jalabiyas' })}>
             <img src="https://placehold.co/600x800/444/FFF?text=Jalabiyas+%26+Kaftans" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors"></div>
             <div className="absolute bottom-10 left-10 text-white">
@@ -70,7 +70,7 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
               <span className="text-sm font-medium border-b border-white pb-1">Shop Everyday</span>
             </div>
           </div>
-          <div className="relative h-[500px] group cursor-pointer rounded-xl overflow-hidden">
+          <div className="relative h-[500px] group cursor-pointer rounded-xl overflow-hidden" onClick={() => onNavigate(Page.SHOP, { category: 'Caps' })}>
             <img src="https://placehold.co/600x800/666/FFF?text=Caps+%26+Accessories" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors"></div>
             <div className="absolute bottom-10 left-10 text-white">
@@ -97,7 +97,13 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
 };
 
 // --- SHOP PAGE (PLP) ---
-export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void }> = ({ onNavigate }) => {
+export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; params?: any }> = ({ onNavigate, params }) => {
+  const currentCategory = params?.category || 'All';
+  
+  const filteredProducts = currentCategory === 'All' || currentCategory === 'New Arrivals'
+    ? PRODUCTS 
+    : PRODUCTS.filter(p => p.category === currentCategory || (currentCategory === 'Jalabiyas' && p.category === 'Kaftan'));
+
   return (
     <div className="max-w-[1920px] mx-auto px-6 md:px-10 py-12">
       <div className="flex flex-col lg:flex-row gap-12">
@@ -105,15 +111,20 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
         <aside className="w-full lg:w-64 flex-shrink-0 space-y-8">
           <div>
             <h3 className="text-lg font-bold mb-4">Filters</h3>
-            <button className="text-sm text-gray-500 hover:text-black underline">Clear All</button>
+            <button className="text-sm text-gray-500 hover:text-black underline" onClick={() => onNavigate(Page.SHOP)}>Clear All</button>
           </div>
           
           <div className="border-t pt-6">
             <h4 className="font-semibold mb-4">Category</h4>
             <div className="space-y-3">
-              {['Agbadas', 'Jalabiyas', 'Kaftan', 'Caps', 'Fabrics'].map(cat => (
+              {['Agbadas', 'Jalabiyas', 'Caps', 'Fabrics'].map(cat => (
                 <label key={cat} className="flex items-center gap-3 cursor-pointer text-sm text-gray-600 hover:text-black">
-                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                  <input 
+                    type="checkbox" 
+                    checked={currentCategory === cat} 
+                    onChange={() => onNavigate(Page.SHOP, { category: cat })}
+                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" 
+                  />
                   {cat}
                 </label>
               ))}
@@ -144,12 +155,15 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
               <div className="flex gap-2 text-sm text-gray-500 mb-2">
-                <span>Home</span> / <span className="text-black">Men's Collection</span>
+                <span onClick={() => onNavigate(Page.HOME)} className="cursor-pointer hover:text-black">Home</span> / 
+                <span className="text-black">{currentCategory}</span>
               </div>
-              <h1 className="text-4xl font-serif font-bold">Men's Traditional Wear</h1>
+              <h1 className="text-4xl font-serif font-bold">
+                {currentCategory === 'All' ? "Men's Traditional Wear" : currentCategory}
+              </h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500">{PRODUCTS.length} items</span>
+              <span className="text-sm text-gray-500">{filteredProducts.length} items</span>
               <select className="h-10 border border-gray-200 rounded px-3 text-sm bg-white">
                 <option>Sort by: Newest</option>
                 <option>Price: Low to High</option>
@@ -159,30 +173,39 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
           </div>
 
           {/* Active Filters */}
-          <div className="flex gap-2 mb-8">
-            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-2">
-              All Items <span className="material-symbols-outlined text-sm cursor-pointer">close</span>
-            </span>
-          </div>
+          {currentCategory !== 'All' && (
+            <div className="flex gap-2 mb-8">
+              <span className="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-2">
+                {currentCategory} <span className="material-symbols-outlined text-sm cursor-pointer" onClick={() => onNavigate(Page.SHOP)}>close</span>
+              </span>
+            </div>
+          )}
 
           {/* Product Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-            {PRODUCTS.map(product => (
-              <div key={product.id} className="group cursor-pointer" onClick={() => onNavigate(Page.PRODUCT, { id: product.id })}>
-                <div className="aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-4 relative">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  {product.isNew && <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 text-[10px] font-bold uppercase tracking-wider">New Arrival</span>}
-                </div>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium text-base group-hover:text-gray-600 transition-colors">{product.name}</h3>
-                    {product.collection && <p className="text-gray-500 text-xs mt-1">{product.collection} Collection</p>}
+          {filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+              {filteredProducts.map(product => (
+                <div key={product.id} className="group cursor-pointer" onClick={() => onNavigate(Page.PRODUCT, { id: product.id })}>
+                  <div className="aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-4 relative">
+                    <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    {product.isNew && <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 text-[10px] font-bold uppercase tracking-wider">New Arrival</span>}
                   </div>
-                  <span className="font-medium text-sm">${product.price}</span>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium text-base group-hover:text-gray-600 transition-colors">{product.name}</h3>
+                      {product.collection && <p className="text-gray-500 text-xs mt-1">{product.collection} Collection</p>}
+                    </div>
+                    <span className="font-medium text-sm">${product.price}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <p className="text-gray-500">No products found in this category.</p>
+              <Button className="mt-4" onClick={() => onNavigate(Page.SHOP)}>View All Products</Button>
+            </div>
+          )}
 
           {/* Pagination */}
           <div className="mt-16 flex justify-center gap-2">

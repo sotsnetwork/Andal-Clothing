@@ -7,7 +7,7 @@ interface LayoutProps {
   onNavigate: (page: Page, params?: any) => void;
 }
 
-export const Header: React.FC<{ onNavigate: (page: Page) => void; cartCount: number }> = ({ onNavigate, cartCount }) => {
+export const Header: React.FC<{ onNavigate: (page: Page, params?: any) => void; cartCount: number }> = ({ onNavigate, cartCount }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -21,11 +21,11 @@ export const Header: React.FC<{ onNavigate: (page: Page) => void; cartCount: num
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
-          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">New Arrivals</button>
-          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">Agbadas</button>
-          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">Jalabiyas</button>
-          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">Caps</button>
-          <button onClick={() => onNavigate(Page.SHOP)} className="text-sm font-medium hover:text-gray-500 transition-colors">Fabrics</button>
+          <button onClick={() => onNavigate(Page.SHOP, { category: 'New Arrivals' })} className="text-sm font-medium hover:text-gray-500 transition-colors">New Arrivals</button>
+          <button onClick={() => onNavigate(Page.SHOP, { category: 'Agbadas' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Agbadas</button>
+          <button onClick={() => onNavigate(Page.SHOP, { category: 'Jalabiyas' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Jalabiyas</button>
+          <button onClick={() => onNavigate(Page.SHOP, { category: 'Caps' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Caps</button>
+          <button onClick={() => onNavigate(Page.SHOP, { category: 'Fabrics' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Fabrics</button>
           <button onClick={() => onNavigate(Page.JOURNAL)} className="text-sm font-medium hover:text-gray-500 transition-colors">Journal</button>
         </nav>
 
@@ -54,10 +54,10 @@ export const Header: React.FC<{ onNavigate: (page: Page) => void; cartCount: num
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 p-6 flex flex-col gap-4 shadow-lg">
-          <button onClick={() => { onNavigate(Page.SHOP); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Agbadas</button>
-          <button onClick={() => { onNavigate(Page.SHOP); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Jalabiyas</button>
-          <button onClick={() => { onNavigate(Page.SHOP); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Caps (Fila)</button>
-          <button onClick={() => { onNavigate(Page.SHOP); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Fabrics</button>
+          <button onClick={() => { onNavigate(Page.SHOP, { category: 'Agbadas' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Agbadas</button>
+          <button onClick={() => { onNavigate(Page.SHOP, { category: 'Jalabiyas' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Jalabiyas</button>
+          <button onClick={() => { onNavigate(Page.SHOP, { category: 'Caps' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Caps (Fila)</button>
+          <button onClick={() => { onNavigate(Page.SHOP, { category: 'Fabrics' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Fabrics</button>
           <button onClick={() => { onNavigate(Page.JOURNAL); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Journal</button>
           <button onClick={() => { onNavigate(Page.ABOUT); setIsMenuOpen(false); }} className="text-left text-lg font-medium">About</button>
           <button onClick={() => { onNavigate(Page.ACCOUNT); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Account</button>
@@ -67,7 +67,7 @@ export const Header: React.FC<{ onNavigate: (page: Page) => void; cartCount: num
   );
 };
 
-export const Footer: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavigate }) => {
+export const Footer: React.FC<{ onNavigate: (page: Page, params?: any) => void }> = ({ onNavigate }) => {
   return (
     <footer className="bg-[#111111] text-white pt-20 pb-10">
       <div className="max-w-[1920px] mx-auto px-6 md:px-10">
@@ -86,30 +86,30 @@ export const Footer: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavig
           <div>
             <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Collections</h4>
             <ul className="space-y-3 text-sm text-gray-400">
-              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.SHOP); }} className="hover:text-white transition-colors">Royal Agbadas</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.SHOP); }} className="hover:text-white transition-colors">Premium Jalabiyas</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.SHOP); }} className="hover:text-white transition-colors">Hand-Woven Caps</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Luxury Fabrics</a></li>
+              <li><button onClick={() => onNavigate(Page.SHOP, { category: 'Agbadas' })} className="hover:text-white transition-colors">Royal Agbadas</button></li>
+              <li><button onClick={() => onNavigate(Page.SHOP, { category: 'Jalabiyas' })} className="hover:text-white transition-colors">Premium Jalabiyas</button></li>
+              <li><button onClick={() => onNavigate(Page.SHOP, { category: 'Caps' })} className="hover:text-white transition-colors">Hand-Woven Caps</button></li>
+              <li><button onClick={() => onNavigate(Page.SHOP, { category: 'Fabrics' })} className="hover:text-white transition-colors">Luxury Fabrics</button></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Company</h4>
             <ul className="space-y-3 text-sm text-gray-400">
-              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.ABOUT); }} className="hover:text-white transition-colors">Our Heritage</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.SUSTAINABILITY); }} className="hover:text-white transition-colors">Sustainability</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.CAREERS); }} className="hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.PRESS); }} className="hover:text-white transition-colors">Press</a></li>
+              <li><button onClick={() => onNavigate(Page.ABOUT)} className="hover:text-white transition-colors">Our Heritage</button></li>
+              <li><button onClick={() => onNavigate(Page.SUSTAINABILITY)} className="hover:text-white transition-colors">Sustainability</button></li>
+              <li><button onClick={() => onNavigate(Page.CAREERS)} className="hover:text-white transition-colors">Careers</button></li>
+              <li><button onClick={() => onNavigate(Page.PRESS)} className="hover:text-white transition-colors">Press</button></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Support</h4>
             <ul className="space-y-3 text-sm text-gray-400">
-              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate(Page.CONTACT); }} className="hover:text-white transition-colors">Contact Us</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Shipping & Returns</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Care Instructions</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Size Guide</a></li>
+              <li><button onClick={() => onNavigate(Page.CONTACT)} className="hover:text-white transition-colors">Contact Us</button></li>
+              <li><button className="hover:text-white transition-colors">Shipping & Returns</button></li>
+              <li><button className="hover:text-white transition-colors">Care Instructions</button></li>
+              <li><button className="hover:text-white transition-colors">Size Guide</button></li>
             </ul>
           </div>
         </div>
@@ -117,8 +117,8 @@ export const Footer: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavig
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
           <p>© 2024 Andal Clothing. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <button className="hover:text-white transition-colors">Privacy Policy</button>
+            <button className="hover:text-white transition-colors">Terms of Service</button>
           </div>
         </div>
       </div>

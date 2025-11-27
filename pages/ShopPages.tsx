@@ -343,15 +343,21 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
             <h4 className="font-semibold mb-4">Category</h4>
             <div className="space-y-3">
               {['New Arrivals', 'Agbadas', 'Jalabiyas', 'Caps', 'Fabrics'].map(cat => (
-                <label key={cat} className="flex items-center gap-3 cursor-pointer text-sm text-gray-600 hover:text-black">
+                <div key={cat} className="flex items-center gap-3">
                   <input 
                     type="checkbox" 
+                    id={`category-filter-${cat.replace(/\s+/g, '-')}`}
                     checked={currentCategory === cat} 
                     onChange={() => onNavigate(Page.SHOP, { category: cat })}
-                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" 
+                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" 
                   />
-                  {cat}
-                </label>
+                  <label 
+                    htmlFor={`category-filter-${cat.replace(/\s+/g, '-')}`}
+                    className="text-sm text-gray-600 hover:text-black cursor-pointer select-none"
+                  >
+                    {cat}
+                  </label>
+                </div>
               ))}
             </div>
           </div>
@@ -374,6 +380,7 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
                   onClick={() => setActiveColor(activeColor === color.name ? null : color.name)}
                   className={`w-8 h-8 rounded-full ${color.class} hover:ring-2 ring-offset-2 ring-primary transition-all relative`}
                   title={color.name}
+                  aria-label={`Filter by color ${color.name}`}
                 >
                   {activeColor === color.name && (
                     <span className="absolute inset-0 flex items-center justify-center">
@@ -398,6 +405,7 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
                   value={localSearchQuery}
                   onChange={handleSearchChange}
                   onFocus={() => setIsSearchFocused(true)}
+                  aria-label="Search products"
                 />
              </div>
              {/* Autocomplete Suggestions */}
@@ -432,6 +440,7 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
                 className="h-10 border border-gray-200 rounded px-3 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-black"
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
+                aria-label="Sort products"
               >
                 <option value="newest">Sort by: Newest</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -492,6 +501,7 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
                     <button 
                       className={`absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur shadow-sm hover:bg-white transition-colors z-10 ${wishlist?.includes(product.id) ? 'text-red-500' : 'text-gray-400'}`}
                       onClick={(e) => { e.stopPropagation(); toggleWishlist && toggleWishlist(product.id); }}
+                      aria-label="Add to wishlist"
                     >
                       <span className={`material-symbols-outlined ${wishlist?.includes(product.id) ? 'fill-current' : ''}`}>favorite</span>
                     </button>
@@ -552,6 +562,7 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
                         onClick={() => setQvColor(c)}
                         className={`w-6 h-6 rounded-full border border-gray-200 ${qvColor === c ? 'ring-2 ring-offset-2 ring-black' : ''}`}
                         style={{ backgroundColor: c === 'White' || c === 'Cream' ? '#EAEAEA' : c.toLowerCase() === 'gold' ? '#B8860B' : c.toLowerCase() === 'navy' ? '#172554' : 'black' }}
+                        aria-label={`Select color ${c}`}
                        />
                      ))}
                    </div>
@@ -704,6 +715,7 @@ export const ProductDetail: React.FC<{
              <button 
                 className={`absolute top-4 right-4 p-3 rounded-full bg-white/80 backdrop-blur shadow-sm hover:bg-white transition-colors z-20 ${wishlist?.includes(product.id) ? 'text-red-500' : 'text-gray-400'}`}
                 onClick={() => toggleWishlist && toggleWishlist(product.id)}
+                aria-label="Add to wishlist"
               >
                 <span className={`material-symbols-outlined ${wishlist?.includes(product.id) ? 'fill-current' : ''}`}>favorite</span>
               </button>
@@ -743,14 +755,17 @@ export const ProductDetail: React.FC<{
                 <button 
                   onClick={() => setSelectedColor('Black')}
                   className={`w-8 h-8 rounded-full bg-black ${selectedColor === 'Black' ? 'ring-2 ring-offset-2 ring-black' : ''}`}
+                  aria-label="Select color Black"
                 ></button>
                 <button 
                   onClick={() => setSelectedColor('White')}
                   className={`w-8 h-8 rounded-full bg-[#EAEAEA] border border-gray-200 ${selectedColor === 'White' ? 'ring-2 ring-offset-2 ring-gray-300' : ''}`}
+                  aria-label="Select color White"
                 ></button>
                 <button 
                   onClick={() => setSelectedColor('Navy')}
                   className={`w-8 h-8 rounded-full bg-blue-900 border border-gray-200 ${selectedColor === 'Navy' ? 'ring-2 ring-offset-2 ring-gray-300' : ''}`}
+                  aria-label="Select color Navy"
                 ></button>
               </div>
             </div>

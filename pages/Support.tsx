@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Page } from '../types';
 import { Button, Input, Modal } from '../components/Shared';
 import { PRODUCTS } from './ShopPages';
@@ -44,7 +44,8 @@ export const Account: React.FC<{
   wishlist?: string[];
   toggleWishlist?: (id: string) => void;
   user?: { name: string; email: string } | null;
-}> = ({ onNavigate, params, onLogout, wishlist = [], toggleWishlist, user }) => {
+  updateUser?: (user: { name: string; email: string }) => void;
+}> = ({ onNavigate, params, onLogout, wishlist = [], toggleWishlist, user, updateUser }) => {
   const currentView = params?.view || 'profile';
 
   // --- ORDER STATE ---
@@ -58,6 +59,11 @@ export const Account: React.FC<{
   
   // --- USER PROFILE STATE ---
   const [passwordLastChanged, setPasswordLastChanged] = useState<string | null>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: user?.name || '', email: user?.email || '' });
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
   const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [addressForm, setAddressForm] = useState({
@@ -157,6 +163,82 @@ export const Account: React.FC<{
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  // Update profile form when user changes
+  useEffect(() => {
+    if (user) {
+      setProfileForm({ name: user.name, email: user.email });
+    }
+  }, [user]);
+
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (updateUser) {
+      updateUser({ name: profileForm.name, email: profileForm.email });
+      setIsEditingProfile(false);
+    }
+  };
+
+  const handleCancelEditProfile = () => {
+    setProfileForm({ name: user?.name || '', email: user?.email || '' });
+    setIsEditingProfile(false);
+  };
+
+  const validatePassword = (name: string, value: string) => {
+    let error = '';
+    if (name === 'newPassword' && value.length > 0 && value.length < 8) {
+      error = 'Password must be at least 8 characters';
+    }
+    if (name === 'confirmPassword' && value !== passwordForm.newPassword) {
+      error = 'Passwords do not match';
+    }
+    setPasswordErrors(prev => ({ ...prev, [name]: error }));
+    return error === '';
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({ ...prev, [name]: value }));
+    validatePassword(name, value);
+  };
+
+  const handleSavePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate all fields
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      alert('Please fill in all password fields');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordErrors({ newPassword: 'Password must be at least 8 characters' });
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordErrors({ confirmPassword: 'Passwords do not match' });
+      return;
+    }
+
+    // Save password (in a real app, this would call an API)
+    setPasswordLastChanged(new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
+    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setPasswordErrors({});
+    setIsChangingPassword(false);
+    alert('Password changed successfully!');
+  };
+
+  const handleCancelPassword = () => {
+    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setPasswordErrors({});
+    setIsChangingPassword(false);
+  };
+
   return (
     <div className="flex min-h-[80vh] bg-gray-50">
       <aside className="w-64 bg-white border-r border-gray-200 hidden md:block">
@@ -218,28 +300,134 @@ export const Account: React.FC<{
             <>
               <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
               <div className="space-y-6">
+                {/* Personal Information Card */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h2 className="text-sm text-gray-500 mb-2">Personal Information</h2>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-lg">{user?.name || 'Not set'}</p>
-                      <p className="text-gray-500">{user?.email || 'No email'}</p>
+                  <h2 className="text-sm text-gray-500 mb-4">Personal Information</h2>
+                  {!isEditingProfile ? (
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-bold text-lg">{user?.name || 'Not set'}</p>
+                        <p className="text-gray-500">{user?.email || 'No email'}</p>
+                      </div>
+                      <button 
+                        onClick={() => setIsEditingProfile(true)} 
+                        className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium"
+                      >
+                        Edit
+                      </button>
                     </div>
-                    <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium">Edit</button>
-                  </div>
+                  ) : (
+                    <form onSubmit={handleSaveProfile} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Full Name</label>
+                        <Input
+                          name="name"
+                          value={profileForm.name}
+                          onChange={handleProfileChange}
+                          placeholder="Enter your full name"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Email Address</label>
+                        <Input
+                          type="email"
+                          name="email"
+                          value={profileForm.email}
+                          onChange={handleProfileChange}
+                          placeholder="Enter your email"
+                          required
+                        />
+                      </div>
+                      <div className="flex gap-4 pt-2">
+                        <Button type="submit" className="flex-1">Save Changes</Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={handleCancelEditProfile} 
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  )}
                 </div>
 
+                {/* Password Card */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h2 className="text-sm text-gray-500 mb-2">Password</h2>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-lg tracking-widest">••••••••••••</p>
-                      <p className="text-gray-500 text-sm">
-                        {passwordLastChanged ? `Last changed ${passwordLastChanged}` : 'Password not set'}
-                      </p>
+                  <h2 className="text-sm text-gray-500 mb-4">Password</h2>
+                  {!isChangingPassword ? (
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-bold text-lg tracking-widest">••••••••••••</p>
+                        <p className="text-gray-500 text-sm">
+                          {passwordLastChanged ? `Last changed ${passwordLastChanged}` : 'Password not set'}
+                        </p>
+                      </div>
+                      <button 
+                        onClick={() => setIsChangingPassword(true)} 
+                        className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium"
+                      >
+                        {passwordLastChanged ? 'Change Password' : 'Create Password'}
+                      </button>
                     </div>
-                    <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium">Change Password</button>
-                  </div>
+                  ) : (
+                    <form onSubmit={handleSavePassword} className="space-y-4">
+                      {passwordLastChanged && (
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Current Password</label>
+                          <Input
+                            type="password"
+                            name="currentPassword"
+                            value={passwordForm.currentPassword}
+                            onChange={handlePasswordChange}
+                            placeholder="Enter current password"
+                            required
+                          />
+                        </div>
+                      )}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">New Password</label>
+                        <Input
+                          type="password"
+                          name="newPassword"
+                          value={passwordForm.newPassword}
+                          onChange={handlePasswordChange}
+                          placeholder="Enter new password (min. 8 characters)"
+                          required
+                        />
+                        {passwordErrors.newPassword && (
+                          <p className="text-red-500 text-xs mt-1">{passwordErrors.newPassword}</p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Confirm New Password</label>
+                        <Input
+                          type="password"
+                          name="confirmPassword"
+                          value={passwordForm.confirmPassword}
+                          onChange={handlePasswordChange}
+                          placeholder="Confirm new password"
+                          required
+                        />
+                        {passwordErrors.confirmPassword && (
+                          <p className="text-red-500 text-xs mt-1">{passwordErrors.confirmPassword}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-4 pt-2">
+                        <Button type="submit" className="flex-1">Save Password</Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={handleCancelPassword} 
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               </div>
             </>

@@ -114,7 +114,11 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
     <div>
       {/* Hero Section */}
       <section className="relative h-[90vh] w-full flex items-center justify-center bg-gray-900 text-white">
-        <div className="absolute inset-0 bg-[url('https://placehold.co/1920x1080/172554/FFF?text=Man+in+Blue+Agbada')] bg-cover bg-center"></div>
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/andal.jpg')" }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80"></div>
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <h1 className="text-6xl md:text-8xl font-serif font-bold mb-6 leading-tight tracking-tight">The Essence of Nobility</h1>
           <p className="text-lg md:text-xl mb-10 font-light opacity-90 max-w-2xl mx-auto">Elevate your presence with our premium collection of Agbadas, Jalabiyas, and authentic hand-woven caps.</p>

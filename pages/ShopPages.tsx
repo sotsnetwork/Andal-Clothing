@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Product, Page, CartItem, Review } from '../types';
 import { Button, Modal, Input } from '../components/Shared';
@@ -10,6 +11,11 @@ export const PRODUCTS: Product[] = [
     price: 150000, 
     category: 'Agbadas', 
     image: 'https://placehold.co/800x1000/1a1a1a/FFF?text=Royal+Agbada', 
+    images: [
+      'https://placehold.co/800x1000/1a1a1a/FFF?text=Royal+Agbada',
+      'https://placehold.co/800x1000/2a2a2a/FFF?text=Detail+View',
+      'https://placehold.co/800x1000/111/FFF?text=Side+Profile'
+    ],
     isNew: true, 
     collection: 'Eid', 
     colors: ['Black', 'Navy', 'Gold'],
@@ -597,11 +603,33 @@ export const ProductDetail: React.FC<{
   const [selectedSize, setSelectedSize] = useState('M');
   const [selectedColor, setSelectedColor] = useState('Black');
   const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
+  
+  // Gallery State
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [activeImage, setActiveImage] = useState<string>('');
 
   // Review Form State
   const [rating, setRating] = useState(5);
   const [reviewerName, setReviewerName] = useState('');
   const [comment, setComment] = useState('');
+
+  // Init Gallery
+  useEffect(() => {
+    const initialImages = product.images && product.images.length > 0 ? product.images : [product.image];
+    setGalleryImages(initialImages);
+    setActiveImage(initialImages[0]);
+  }, [product]);
+
+  // Handle File Upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      const newImageUrls = files.map(file => URL.createObjectURL(file));
+      const updatedGallery = [...galleryImages, ...newImageUrls];
+      setGalleryImages(updatedGallery);
+      if (!activeImage) setActiveImage(newImageUrls[0]);
+    }
+  };
 
   // Handle Recently Viewed
   useEffect(() => {
@@ -633,7 +661,6 @@ export const ProductDetail: React.FC<{
   const handleAddToCart = () => {
     if (addToCart) {
       addToCart(product, selectedSize, selectedColor);
-      // Removed automatic navigation to cart, now shows mini-cart in layout
     }
   };
 
@@ -670,7 +697,7 @@ export const ProductDetail: React.FC<{
         <div className="space-y-4">
           <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden relative cursor-zoom-in group">
              <img 
-               src={product.image} 
+               src={activeImage} 
                alt={product.name} 
                className="w-full h-full object-cover transition-transform duration-700 hover:scale-125" 
              />
@@ -681,12 +708,22 @@ export const ProductDetail: React.FC<{
                 <span className={`material-symbols-outlined ${wishlist?.includes(product.id) ? 'fill-current' : ''}`}>favorite</span>
               </button>
           </div>
-          <div className="grid grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-[3/4] bg-gray-100 rounded-lg cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
-                 <img src={product.image} alt={`Thumbnail ${i}`} className="w-full h-full object-cover" />
+          <div className="grid grid-cols-5 gap-4">
+            {galleryImages.map((img, i) => (
+              <div 
+                key={i} 
+                onClick={() => setActiveImage(img)}
+                className={`aspect-[3/4] bg-gray-100 rounded-lg cursor-pointer overflow-hidden border-2 ${activeImage === img ? 'border-black' : 'border-transparent hover:border-gray-300'} transition-all`}
+              >
+                 <img src={img} alt={`Thumbnail ${i}`} className="w-full h-full object-cover" />
               </div>
             ))}
+             {/* Upload Photos Button */}
+             <label className="aspect-[3/4] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-colors text-gray-400 hover:text-gray-600">
+                <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} />
+                <span className="material-symbols-outlined text-2xl">add_photo_alternate</span>
+                <span className="text-[10px] uppercase font-bold mt-1">Add</span>
+             </label>
           </div>
         </div>
 
@@ -958,7 +995,7 @@ export const Cart: React.FC<CartProps> = ({
                     >
                       <span className="material-symbols-outlined text-sm">remove</span>
                     </button>
-                    <span className="text-sm font-medium w-4 text-center">{item.quantity}</span>
+                    <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
                     <button 
                       onClick={() => updateQuantity && updateQuantity(item.id, item.selectedSize, item.selectedColor, 1)}
                       className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50"
@@ -967,13 +1004,13 @@ export const Cart: React.FC<CartProps> = ({
                     </button>
                   </div>
                 </div>
-                <div className="flex flex-col justify-between items-end">
-                  <span className="font-medium">{formatCurrency(item.price * item.quantity)}</span>
+                <div className="flex flex-col items-end justify-between">
+                  <span className="font-medium text-lg">{formatCurrency(item.price * item.quantity)}</span>
                   <button 
                     onClick={() => removeFromCart && removeFromCart(item.id, item.selectedSize, item.selectedColor)}
-                    className="text-gray-400 hover:text-red-500 flex items-center gap-1 text-sm"
+                    className="text-gray-400 hover:text-red-500 transition-colors"
                   >
-                    <span className="material-symbols-outlined text-lg">close</span> Remove
+                    <span className="material-symbols-outlined">delete</span>
                   </button>
                 </div>
               </div>
@@ -982,36 +1019,26 @@ export const Cart: React.FC<CartProps> = ({
         </div>
 
         {/* Order Summary */}
-        <div className="w-full lg:w-96 bg-gray-50 p-8 rounded-lg h-fit">
+        <div className="w-full lg:w-96 bg-gray-50 p-8 rounded-xl h-fit">
           <h2 className="text-xl font-bold mb-6">Order Summary</h2>
-          <div className="space-y-4 mb-6 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">{formatCurrency(subtotal)}</span>
+          <div className="space-y-4 mb-6 border-b border-gray-200 pb-6">
+            <div className="flex justify-between text-gray-600">
+              <span>Subtotal</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Shipping</span>
-              <span className="font-medium">{formatCurrency(shipping)}</span>
-            </div>
-            <div className="border-t border-gray-200 pt-4 flex justify-between text-base">
-              <span className="font-bold">Total</span>
-              <span className="font-bold">{formatCurrency(total)}</span>
+            <div className="flex justify-between text-gray-600">
+              <span>Shipping</span>
+              <span>{formatCurrency(shipping)}</span>
             </div>
           </div>
-          
-          <Button onClick={handleCheckout} className="w-full">
-            {isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout'}
-          </Button>
-          {!isAuthenticated && (
-             <p className="text-xs text-red-500 text-center mt-2">You must be logged in to complete your order.</p>
-          )}
-          
-          <div className="mt-6 text-center">
-             <p className="text-xs text-gray-500 mb-4">We accept</p>
-             <div className="flex justify-center gap-3 opacity-50">
-                <span className="material-symbols-outlined">credit_card</span>
-                <span className="material-symbols-outlined">account_balance_wallet</span>
-             </div>
+          <div className="flex justify-between text-xl font-bold mb-8">
+            <span>Total</span>
+            <span>{formatCurrency(total)}</span>
+          </div>
+          <Button onClick={handleCheckout} className="w-full h-14 text-lg mb-4">Proceed to Checkout</Button>
+          <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
+            <span className="material-symbols-outlined text-base">lock</span>
+            Secure Checkout
           </div>
         </div>
       </div>
@@ -1019,45 +1046,20 @@ export const Cart: React.FC<CartProps> = ({
   );
 };
 
-// --- SUCCESS PAGE ---
-export const CheckoutSuccess: React.FC<{ onNavigate: (page: Page, params?: any) => void }> = ({ onNavigate }) => {
+export const CheckoutSuccess: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavigate }) => {
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center bg-[#101022] text-white">
-      <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mb-8">
-        <span className="material-symbols-outlined text-4xl text-blue-400">check_circle</span>
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 text-center">
+      <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-8 animate-fade-in">
+        <span className="material-symbols-outlined text-5xl text-green-600">check_circle</span>
       </div>
-      <h1 className="text-4xl md:text-5xl font-bold font-serif mb-4">Thank You For Your Order</h1>
-      <p className="text-gray-400 max-w-md mb-12 text-lg">Your order #11232-23424 has been placed. A confirmation email with all the details has been sent to your inbox.</p>
-      
-      <div className="bg-white/5 p-8 rounded-xl w-full max-w-2xl text-left mb-12 border border-white/10">
-        <h2 className="text-xl font-bold mb-6 border-b border-white/10 pb-4">Order Summary</h2>
-        <div className="space-y-6">
-           <div className="flex gap-4">
-             <img src={PRODUCTS[0].image} className="w-16 h-16 object-cover rounded" />
-             <div className="flex-1">
-                <p className="font-medium">{PRODUCTS[0].name}</p>
-                <p className="text-sm text-gray-400">Size: L, Color: Gold</p>
-             </div>
-             <span>{formatCurrency(PRODUCTS[0].price)}</span>
-           </div>
-           <div className="flex gap-4">
-             <img src={PRODUCTS[4].image} className="w-16 h-16 object-cover rounded" />
-             <div className="flex-1">
-                <p className="font-medium">{PRODUCTS[4].name}</p>
-                <p className="text-sm text-gray-400">Color: Classic Grey</p>
-             </div>
-             <span>{formatCurrency(PRODUCTS[4].price)}</span>
-           </div>
-        </div>
-        <div className="border-t border-white/10 mt-6 pt-4 flex justify-between font-bold text-lg">
-          <span>Total</span>
-          <span>{formatCurrency(PRODUCTS[0].price + PRODUCTS[4].price)}</span>
-        </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-        <Button onClick={() => {}} className="flex-1 bg-blue-600 hover:bg-blue-700">Track Your Order</Button>
-        <Button onClick={() => onNavigate(Page.SHOP)} className="flex-1 bg-transparent border border-white/20 text-white hover:bg-white/10">Continue Shopping</Button>
+      <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6">Order Confirmed!</h1>
+      <p className="text-gray-600 text-lg max-w-lg mb-10 leading-relaxed">
+        Thank you for your purchase. Your order has been received and is being processed. 
+        You will receive an email confirmation shortly.
+      </p>
+      <div className="flex gap-4">
+        <Button onClick={() => onNavigate(Page.ACCOUNT)}>View Order</Button>
+        <Button variant="outline" onClick={() => onNavigate(Page.SHOP)}>Continue Shopping</Button>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+
 export interface Review {
   id: string;
   reviewerName: string;
@@ -11,6 +12,7 @@ export interface Product {
   name: string;
   price: number;
   image: string;
+  images?: string[]; // Added support for gallery images
   category: string;
   isNew?: boolean;
   collection?: string;

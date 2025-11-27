@@ -3,7 +3,7 @@ import { Page } from '../types';
 import { Button, Input } from '../components/Shared';
 
 // --- ACCOUNT PAGE ---
-export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void; params?: any }> = ({ onNavigate, params }) => {
+export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void; params?: any; onLogout?: () => void }> = ({ onNavigate, params, onLogout }) => {
   const currentView = params?.view || 'profile';
 
   return (
@@ -46,7 +46,7 @@ export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void;
             <span className="material-symbols-outlined text-xl">credit_card</span> Payment Methods
           </button>
           <button 
-            onClick={() => onNavigate(Page.LOGIN)}
+            onClick={() => onLogout && onLogout()}
             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg font-medium text-sm text-gray-600 mt-10 text-left"
           >
             <span className="material-symbols-outlined text-xl">logout</span> Logout

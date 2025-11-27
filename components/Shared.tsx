@@ -5,65 +5,108 @@ interface LayoutProps {
   children: React.ReactNode;
   activePage: Page;
   onNavigate: (page: Page, params?: any) => void;
+  isAuthenticated?: boolean;
 }
 
-export const Header: React.FC<{ onNavigate: (page: Page, params?: any) => void; cartCount: number }> = ({ onNavigate, cartCount }) => {
+export const Header: React.FC<{ onNavigate: (page: Page, params?: any) => void; cartCount: number; isAuthenticated?: boolean }> = ({ onNavigate, cartCount, isAuthenticated }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onNavigate(Page.SHOP, { search: searchQuery });
+      setIsSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
-      <div className="max-w-[1920px] mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center gap-4 cursor-pointer" onClick={() => onNavigate(Page.HOME)}>
-          <span className="material-symbols-outlined text-3xl">all_inclusive</span>
-          <h1 className="text-2xl font-bold tracking-tighter font-serif">Andal Clothing</h1>
+    <>
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-[1920px] mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-4 cursor-pointer" onClick={() => onNavigate(Page.HOME)}>
+            <span className="material-symbols-outlined text-3xl">all_inclusive</span>
+            <h1 className="text-2xl font-bold tracking-tighter font-serif">Andal Clothing</h1>
+          </div>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-8">
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'New Arrivals' })} className="text-sm font-medium hover:text-gray-500 transition-colors">New Arrivals</button>
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'Agbadas' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Agbadas</button>
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'Jalabiyas' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Jalabiyas</button>
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'Caps' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Caps</button>
+            <button onClick={() => onNavigate(Page.SHOP, { category: 'Fabrics' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Fabrics</button>
+            <button onClick={() => onNavigate(Page.JOURNAL)} className="text-sm font-medium hover:text-gray-500 transition-colors">Journal</button>
+          </nav>
+
+          {/* Icons */}
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className={`p-2 hover:bg-gray-100 rounded-full transition-colors ${isSearchOpen ? 'bg-gray-100 text-primary' : ''}`}
+            >
+              <span className="material-symbols-outlined">search</span>
+            </button>
+            <button 
+              onClick={() => onNavigate(isAuthenticated ? Page.ACCOUNT : Page.LOGIN)} 
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              title={isAuthenticated ? 'Account' : 'Sign In'}
+            >
+              <span className="material-symbols-outlined">{isAuthenticated ? 'person' : 'login'}</span>
+            </button>
+            <button onClick={() => onNavigate(Page.CART)} className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
+              <span className="material-symbols-outlined">shopping_bag</span>
+              {cartCount > 0 && (
+                <span className="absolute top-1 right-0 bg-black text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+          </div>
         </div>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
-          <button onClick={() => onNavigate(Page.SHOP, { category: 'New Arrivals' })} className="text-sm font-medium hover:text-gray-500 transition-colors">New Arrivals</button>
-          <button onClick={() => onNavigate(Page.SHOP, { category: 'Agbadas' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Agbadas</button>
-          <button onClick={() => onNavigate(Page.SHOP, { category: 'Jalabiyas' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Jalabiyas</button>
-          <button onClick={() => onNavigate(Page.SHOP, { category: 'Caps' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Caps</button>
-          <button onClick={() => onNavigate(Page.SHOP, { category: 'Fabrics' })} className="text-sm font-medium hover:text-gray-500 transition-colors">Fabrics</button>
-          <button onClick={() => onNavigate(Page.JOURNAL)} className="text-sm font-medium hover:text-gray-500 transition-colors">Journal</button>
-        </nav>
+        {/* Search Overlay */}
+        {isSearchOpen && (
+          <div className="absolute top-full left-0 w-full bg-white border-b border-gray-100 p-4 shadow-lg animate-fade-in">
+            <div className="max-w-3xl mx-auto relative">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+              <input 
+                type="text" 
+                placeholder="Search for agbadas, caps, or fabrics..." 
+                className="w-full h-12 pl-12 pr-4 bg-gray-50 rounded-lg focus:outline-none focus:ring-1 focus:ring-black"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearch}
+              />
+              <button onClick={() => setIsSearchOpen(false)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+          </div>
+        )}
 
-        {/* Icons */}
-        <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <span className="material-symbols-outlined">search</span>
-          </button>
-          <button onClick={() => onNavigate(Page.ACCOUNT)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <span className="material-symbols-outlined">person</span>
-          </button>
-          <button onClick={() => onNavigate(Page.CART)} className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
-            <span className="material-symbols-outlined">shopping_bag</span>
-            {cartCount > 0 && (
-              <span className="absolute top-1 right-0 bg-black text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-          </button>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 p-6 flex flex-col gap-4 shadow-lg">
-          <button onClick={() => { onNavigate(Page.SHOP, { category: 'Agbadas' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Agbadas</button>
-          <button onClick={() => { onNavigate(Page.SHOP, { category: 'Jalabiyas' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Jalabiyas</button>
-          <button onClick={() => { onNavigate(Page.SHOP, { category: 'Caps' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Caps (Fila)</button>
-          <button onClick={() => { onNavigate(Page.SHOP, { category: 'Fabrics' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Fabrics</button>
-          <button onClick={() => { onNavigate(Page.JOURNAL); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Journal</button>
-          <button onClick={() => { onNavigate(Page.ABOUT); setIsMenuOpen(false); }} className="text-left text-lg font-medium">About</button>
-          <button onClick={() => { onNavigate(Page.ACCOUNT); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Account</button>
-        </div>
-      )}
-    </header>
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 p-6 flex flex-col gap-4 shadow-lg h-[calc(100vh-80px)] overflow-y-auto">
+            <button onClick={() => { onNavigate(Page.SHOP, { category: 'Agbadas' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Agbadas</button>
+            <button onClick={() => { onNavigate(Page.SHOP, { category: 'Jalabiyas' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Jalabiyas</button>
+            <button onClick={() => { onNavigate(Page.SHOP, { category: 'Caps' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Caps (Fila)</button>
+            <button onClick={() => { onNavigate(Page.SHOP, { category: 'Fabrics' }); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Fabrics</button>
+            <button onClick={() => { onNavigate(Page.JOURNAL); setIsMenuOpen(false); }} className="text-left text-lg font-medium">Journal</button>
+            <button onClick={() => { onNavigate(Page.ABOUT); setIsMenuOpen(false); }} className="text-left text-lg font-medium">About</button>
+            <button onClick={() => { onNavigate(isAuthenticated ? Page.ACCOUNT : Page.LOGIN); setIsMenuOpen(false); }} className="text-left text-lg font-medium">
+              {isAuthenticated ? 'My Account' : 'Sign In'}
+            </button>
+          </div>
+        )}
+      </header>
+    </>
   );
 };
 
@@ -153,13 +196,13 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ c
   />
 );
 
-export const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate, isAuthenticated }) => {
   // Mock cart count
   const cartCount = 2; 
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Header onNavigate={onNavigate} cartCount={cartCount} />
+      <Header onNavigate={onNavigate} cartCount={cartCount} isAuthenticated={isAuthenticated} />
       <main className="flex-grow animate-fade-in">
         {children}
       </main>

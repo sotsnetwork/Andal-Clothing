@@ -4,9 +4,10 @@ import { Button, Input } from '../components/Shared';
 
 interface AuthProps {
   onNavigate: (page: Page, params?: any) => void;
+  onLogin?: () => void;
 }
 
-export const SignIn: React.FC<AuthProps> = ({ onNavigate }) => {
+export const SignIn: React.FC<AuthProps> = ({ onNavigate, onLogin }) => {
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md space-y-8">
@@ -15,7 +16,7 @@ export const SignIn: React.FC<AuthProps> = ({ onNavigate }) => {
           <p className="text-gray-600">Sign in to access your royal account</p>
         </div>
         
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); onNavigate(Page.ACCOUNT); }}>
+        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); if(onLogin) onLogin(); }}>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Email Address</label>
@@ -60,7 +61,7 @@ export const SignIn: React.FC<AuthProps> = ({ onNavigate }) => {
   );
 };
 
-export const SignUp: React.FC<AuthProps> = ({ onNavigate }) => {
+export const SignUp: React.FC<AuthProps> = ({ onNavigate, onLogin }) => {
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md space-y-8">
@@ -69,7 +70,7 @@ export const SignUp: React.FC<AuthProps> = ({ onNavigate }) => {
           <p className="text-gray-600">Create an account to start your journey</p>
         </div>
         
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); onNavigate(Page.ACCOUNT); }}>
+        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); if(onLogin) onLogin(); }}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>

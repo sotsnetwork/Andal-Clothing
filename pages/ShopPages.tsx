@@ -99,10 +99,24 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
 // --- SHOP PAGE (PLP) ---
 export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; params?: any }> = ({ onNavigate, params }) => {
   const currentCategory = params?.category || 'All';
+  const searchQuery = params?.search || '';
   
-  const filteredProducts = currentCategory === 'All' || currentCategory === 'New Arrivals'
-    ? PRODUCTS 
-    : PRODUCTS.filter(p => p.category === currentCategory || (currentCategory === 'Jalabiyas' && p.category === 'Kaftan'));
+  const filteredProducts = PRODUCTS.filter(p => {
+    // Category Filter
+    const categoryMatch = 
+      currentCategory === 'All' || 
+      currentCategory === 'New Arrivals' || 
+      p.category === currentCategory || 
+      (currentCategory === 'Jalabiyas' && p.category === 'Kaftan');
+
+    // Search Filter
+    const searchMatch = searchQuery 
+      ? p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+
+    return categoryMatch && searchMatch;
+  });
 
   return (
     <div className="max-w-[1920px] mx-auto px-6 md:px-10 py-12">
@@ -159,7 +173,7 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
                 <span className="text-black">{currentCategory}</span>
               </div>
               <h1 className="text-4xl font-serif font-bold">
-                {currentCategory === 'All' ? "Men's Traditional Wear" : currentCategory}
+                {searchQuery ? `Results for "${searchQuery}"` : (currentCategory === 'All' ? "Men's Traditional Wear" : currentCategory)}
               </h1>
             </div>
             <div className="flex items-center gap-4">
@@ -173,11 +187,18 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
           </div>
 
           {/* Active Filters */}
-          {currentCategory !== 'All' && (
-            <div className="flex gap-2 mb-8">
-              <span className="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-2">
-                {currentCategory} <span className="material-symbols-outlined text-sm cursor-pointer" onClick={() => onNavigate(Page.SHOP)}>close</span>
-              </span>
+          {(currentCategory !== 'All' || searchQuery) && (
+            <div className="flex gap-2 mb-8 flex-wrap">
+              {currentCategory !== 'All' && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-2">
+                  Category: {currentCategory} <span className="material-symbols-outlined text-sm cursor-pointer" onClick={() => onNavigate(Page.SHOP)}>close</span>
+                </span>
+              )}
+              {searchQuery && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-2">
+                  Search: "{searchQuery}" <span className="material-symbols-outlined text-sm cursor-pointer" onClick={() => onNavigate(Page.SHOP)}>close</span>
+                </span>
+              )}
             </div>
           )}
 
@@ -202,19 +223,21 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
             </div>
           ) : (
             <div className="text-center py-20">
-              <p className="text-gray-500">No products found in this category.</p>
+              <p className="text-gray-500">No products found matching your criteria.</p>
               <Button className="mt-4" onClick={() => onNavigate(Page.SHOP)}>View All Products</Button>
             </div>
           )}
 
           {/* Pagination */}
-          <div className="mt-16 flex justify-center gap-2">
-            <button className="w-10 h-10 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:text-black hover:border-black transition-colors"><span className="material-symbols-outlined">chevron_left</span></button>
-            <button className="w-10 h-10 flex items-center justify-center rounded bg-black text-white font-medium">1</button>
-            <button className="w-10 h-10 flex items-center justify-center rounded hover:bg-gray-100 font-medium transition-colors">2</button>
-            <span className="w-10 h-10 flex items-center justify-center">...</span>
-            <button className="w-10 h-10 flex items-center justify-center rounded border border-gray-200 hover:border-black transition-colors"><span className="material-symbols-outlined">chevron_right</span></button>
-          </div>
+          {filteredProducts.length > 0 && (
+            <div className="mt-16 flex justify-center gap-2">
+              <button className="w-10 h-10 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:text-black hover:border-black transition-colors"><span className="material-symbols-outlined">chevron_left</span></button>
+              <button className="w-10 h-10 flex items-center justify-center rounded bg-black text-white font-medium">1</button>
+              <button className="w-10 h-10 flex items-center justify-center rounded hover:bg-gray-100 font-medium transition-colors">2</button>
+              <span className="w-10 h-10 flex items-center justify-center">...</span>
+              <button className="w-10 h-10 flex items-center justify-center rounded border border-gray-200 hover:border-black transition-colors"><span className="material-symbols-outlined">chevron_right</span></button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -332,7 +355,17 @@ export const ProductDetail: React.FC<{ id?: string; onNavigate: (page: Page, par
 };
 
 // --- CART PAGE ---
-export const Cart: React.FC<{ onNavigate: (page: Page, params?: any) => void }> = ({ onNavigate }) => {
+export const Cart: React.FC<{ onNavigate: (page: Page, params?: any) => void; isAuthenticated?: boolean }> = ({ onNavigate, isAuthenticated }) => {
+  
+  const handleCheckout = () => {
+    if (isAuthenticated) {
+      onNavigate(Page.CHECKOUT_SUCCESS);
+    } else {
+      // In a real app, you'd save the return URL
+      onNavigate(Page.LOGIN);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-10 py-16">
       <h1 className="text-4xl font-serif font-bold mb-12">Shopping Bag</h1>
@@ -402,7 +435,13 @@ export const Cart: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
               <span className="font-bold">${PRODUCTS[1].price + PRODUCTS[2].price + 25}.00</span>
             </div>
           </div>
-          <Button onClick={() => onNavigate(Page.CHECKOUT_SUCCESS)} className="w-full">Proceed to Checkout</Button>
+          
+          <Button onClick={handleCheckout} className="w-full">
+            {isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout'}
+          </Button>
+          {!isAuthenticated && (
+             <p className="text-xs text-red-500 text-center mt-2">You must be logged in to complete your order.</p>
+          )}
           
           <div className="mt-6 text-center">
              <p className="text-xs text-gray-500 mb-4">We accept</p>

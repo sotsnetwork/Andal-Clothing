@@ -2,6 +2,71 @@ import React from 'react';
 import { Page } from '../types';
 import { Button } from '../components/Shared';
 
+// Social Sharing Helper Functions
+const getShareUrl = (platform: 'facebook' | 'twitter' | 'pinterest', url: string, title: string, description?: string, image?: string) => {
+  const encodedUrl = encodeURIComponent(url);
+  const encodedTitle = encodeURIComponent(title);
+  const encodedDescription = encodeURIComponent(description || title);
+  const encodedImage = encodeURIComponent(image || '');
+
+  switch (platform) {
+    case 'facebook':
+      return `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+    case 'twitter':
+      return `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+    case 'pinterest':
+      return `https://pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedDescription}&media=${encodedImage}`;
+    default:
+      return url;
+  }
+};
+
+const handleShare = (platform: 'facebook' | 'twitter' | 'pinterest', url: string, title: string, description?: string, image?: string) => {
+  const shareUrl = getShareUrl(platform, url, title, description, image);
+  window.open(shareUrl, '_blank', 'width=600,height=400');
+};
+
+// Social Share Buttons Component
+const SocialShareButtons: React.FC<{ url: string; title: string; description?: string; image?: string; variant?: 'light' | 'dark' }> = ({ url, title, description, image, variant = 'light' }) => {
+  const labelColor = variant === 'dark' ? 'text-white/90' : 'text-gray-500';
+  
+  return (
+    <div className="flex items-center gap-3 mt-4">
+      <span className={`text-xs font-medium uppercase tracking-wide ${labelColor}`}>Share:</span>
+      <button
+        onClick={() => handleShare('facebook', url, title, description, image)}
+        className="flex items-center justify-center w-9 h-9 rounded-full bg-[#1877F2] text-white hover:bg-[#166FE5] transition-colors shadow-sm"
+        aria-label="Share on Facebook"
+        title="Share on Facebook"
+      >
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      </button>
+      <button
+        onClick={() => handleShare('twitter', url, title, description, image)}
+        className="flex items-center justify-center w-9 h-9 rounded-full bg-[#1DA1F2] text-white hover:bg-[#1a8cd8] transition-colors"
+        aria-label="Share on Twitter"
+        title="Share on Twitter"
+      >
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+        </svg>
+      </button>
+      <button
+        onClick={() => handleShare('pinterest', url, title, description, image)}
+        className="flex items-center justify-center w-9 h-9 rounded-full bg-[#BD081C] text-white hover:bg-[#a50718] transition-colors"
+        aria-label="Share on Pinterest"
+        title="Share on Pinterest"
+      >
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0C5.373 0 0 5.372 0 12s5.373 12 12 12 12-5.372 12-12S18.627 0 12 0zm0 19c-.721 0-1.418-.109-2.073-.312.286-.465.713-1.227.876-1.878.084-.345.516-2.093.516-2.093.026.05.04.098.06.144.12.24.192.41.192.41s.32.61.75.73c.36.1.6-.19.6-.19s.35-.4.58-.78c.18-.3.35-.63.35-1.13 0-.48-.26-.89-.75-1.19-.6-.37-1.38-.6-1.38-.6s-.12-.09-.12-.22c0-.13.08-.24.19-.24.24 0 .48.05.72.05.42 0 .84-.05 1.26-.15.84-.2 1.5-.6 1.95-1.08.45-.48.68-1.11.68-1.89 0-.78-.27-1.42-.81-1.92-.54-.5-1.26-.75-2.16-.75-.9 0-1.62.25-2.16.75-.54.5-.81 1.14-.81 1.92 0 .48.12.9.36 1.26.24.36.6.6 1.08.72.12.03.24.05.36.05.18 0 .33-.06.45-.18.12-.12.18-.27.18-.45 0-.18-.06-.33-.18-.45-.12-.12-.27-.18-.45-.18-.12 0-.24.02-.36.05-.24.06-.48.09-.72.09-.42 0-.84-.05-1.26-.15-.84-.2-1.5-.6-1.95-1.08-.45-.48-.68-1.11-.68-1.89 0-.78.27-1.42.81-1.92.54-.5 1.26-.75 2.16-.75.9 0 1.62.25 2.16.75.54.5.81 1.14.81 1.92 0 .48-.12.9-.36 1.26-.24.36-.6.6-1.08.72-.12.03-.24.05-.36.05-.18 0-.33-.06-.45-.18-.12-.12-.18-.27-.18-.45 0-.18.06-.33.18-.45.12-.12.27-.18.45-.18.12 0 .24.02.36.05.24.06.48.09.72.09.42 0 .84-.05 1.26-.15.84-.2 1.5-.6 1.95-1.08.45-.48.68-1.11.68-1.89 0-.78-.27-1.42-.81-1.92-.54-.5-1.26-.75-2.16-.75z"/>
+        </svg>
+      </button>
+    </div>
+  );
+};
+
 // --- ABOUT PAGE ---
 export const About: React.FC = () => (
   <div className="max-w-[1920px] mx-auto">
@@ -79,12 +144,23 @@ export const Journal: React.FC = () => (
       <h1 className="text-6xl font-serif font-medium mb-10">The Andal Journal</h1>
       
       {/* Hero Article */}
-      <div className="relative rounded-xl overflow-hidden h-[500px] mb-12 group cursor-pointer">
+      <div className="relative rounded-xl overflow-hidden h-[500px] mb-12 group">
         <img src="https://placehold.co/1200x600/111/444?text=The+Art+of+Agbada" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-10">
           <span className="text-white/80 text-sm mb-2 uppercase tracking-wide">Style Guide</span>
           <h2 className="text-white text-4xl font-medium mb-4">Mastering the Agbada: A Gentleman's Guide</h2>
-          <span className="text-white underline underline-offset-4">Read More</span>
+          <div className="flex items-center gap-4">
+            <span className="text-white underline underline-offset-4 cursor-pointer">Read More</span>
+            <div className="flex items-center gap-2">
+              <SocialShareButtons
+                url={`${window.location.origin}/#journal/mastering-the-agbada`}
+                title="Mastering the Agbada: A Gentleman's Guide"
+                description="Discover the art of wearing the Agbada with elegance and sophistication."
+                image="https://placehold.co/1200x600/111/444?text=The+Art+of+Agbada"
+                variant="dark"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -111,16 +187,27 @@ export const Journal: React.FC = () => (
         { title: 'Caring for Hand-Embroidered Attire', img: 'https://placehold.co/600x400/555/FFF?text=Care+Guide', cat: 'Fabric Care' },
         { title: 'Traditional Weddings: What to Wear', img: 'https://placehold.co/600x400/666/FFF?text=Wedding+Guest', cat: 'Culture' },
         { title: 'The Significance of Colors in Agbada', img: 'https://placehold.co/600x400/777/FFF?text=Color+Meaning', cat: 'Culture' },
-      ].map((article, i) => (
-        <article key={i} className="group cursor-pointer">
-          <div className="overflow-hidden rounded-lg mb-4">
-            <img src={article.img} className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-          </div>
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{article.cat}</span>
-          <h3 className="text-xl font-serif font-medium mt-2 mb-2 group-hover:underline underline-offset-4">{article.title}</h3>
-          <p className="text-gray-600 text-sm line-clamp-2">Discover the rich traditions and modern styling tips for the contemporary African man.</p>
-        </article>
-      ))}
+      ].map((article, i) => {
+        const articleUrl = `${window.location.origin}/#journal/${article.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+        const articleDescription = `Discover the rich traditions and modern styling tips for the contemporary African man. ${article.title}`;
+        
+        return (
+          <article key={i} className="group">
+            <div className="overflow-hidden rounded-lg mb-4 cursor-pointer">
+              <img src={article.img} className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+            </div>
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{article.cat}</span>
+            <h3 className="text-xl font-serif font-medium mt-2 mb-2 group-hover:underline underline-offset-4 cursor-pointer">{article.title}</h3>
+            <p className="text-gray-600 text-sm line-clamp-2 mb-3">Discover the rich traditions and modern styling tips for the contemporary African man.</p>
+            <SocialShareButtons
+              url={articleUrl}
+              title={article.title}
+              description={articleDescription}
+              image={article.img}
+            />
+          </article>
+        );
+      })}
     </div>
     
     <div className="mt-16 text-center">

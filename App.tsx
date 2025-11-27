@@ -53,6 +53,10 @@ const App: React.FC = () => {
     navigate(Page.HOME);
   };
 
+  const updateUser = (updatedUser: { name: string; email: string }) => {
+    setUser(updatedUser);
+  };
+
   // Cart Functions
   const addToCart = (product: Product, size: string, color: string) => {
     setCart(prev => {
@@ -209,6 +213,7 @@ const App: React.FC = () => {
           wishlist={wishlist}
           toggleWishlist={toggleWishlist}
           user={user}
+          updateUser={updateUser}
         />
       )}
       {page === Page.ABOUT && <About />}

@@ -4,10 +4,27 @@ import { Button, Input } from '../components/Shared';
 
 interface AuthProps {
   onNavigate: (page: Page, params?: any) => void;
-  onLogin?: () => void;
+  onLogin?: (userData?: { name: string; email: string }) => void;
+  user?: { name: string; email: string } | null;
 }
 
-export const SignIn: React.FC<AuthProps> = ({ onNavigate, onLogin }) => {
+export const SignIn: React.FC<AuthProps> = ({ onNavigate, onLogin, user }) => {
+  const [email, setEmail] = useState('');
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onLogin) {
+      // If user data exists (from previous signup), use it; otherwise use email
+      if (user) {
+        onLogin(user);
+      } else {
+        // For demo purposes, create a basic user from email
+        const nameFromEmail = email.split('@')[0];
+        onLogin({ name: nameFromEmail, email });
+      }
+    }
+  };
+  
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md space-y-8">
@@ -16,11 +33,11 @@ export const SignIn: React.FC<AuthProps> = ({ onNavigate, onLogin }) => {
           <p className="text-gray-600">Sign in to access your royal account</p>
         </div>
         
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); if(onLogin) onLogin(); }}>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Email Address</label>
-              <Input type="email" placeholder="Enter your email" required />
+              <Input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Password</label>
@@ -61,6 +78,24 @@ export const SignIn: React.FC<AuthProps> = ({ onNavigate, onLogin }) => {
 };
 
 export const SignUp: React.FC<AuthProps> = ({ onNavigate, onLogin }) => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    if (onLogin) {
+      const fullName = `${firstName} ${lastName}`.trim();
+      onLogin({ name: fullName || email.split('@')[0], email });
+    }
+  };
+  
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md space-y-8">
@@ -69,29 +104,29 @@ export const SignUp: React.FC<AuthProps> = ({ onNavigate, onLogin }) => {
           <p className="text-gray-600">Create an account to start your journey</p>
         </div>
         
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); if(onLogin) onLogin(); }}>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">First Name</label>
-                <Input placeholder="First name" required />
+                <Input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Last Name</label>
-                <Input placeholder="Last name" required />
+                <Input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Email Address</label>
-              <Input type="email" placeholder="Enter your email" required />
+              <Input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Password</label>
-              <Input type="password" placeholder="Create a password" required />
+              <Input type="password" placeholder="Create a password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Confirm Password</label>
-              <Input type="password" placeholder="Confirm your password" required />
+              <Input type="password" placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
             </div>
           </div>
           

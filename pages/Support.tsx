@@ -30,59 +30,7 @@ interface Order {
   items: OrderItem[];
 }
 
-const MOCK_ORDERS: Order[] = [
-  { 
-    id: '#4523-23', 
-    date: 'Oct 12, 2024', 
-    status: 'Delivered', 
-    total: '₦175,000.00', 
-    items: [
-      { name: 'Royal Grand Agbada', quantity: 1, price: '₦150,000.00', image: 'https://placehold.co/100/1a1a1a/FFF?text=Agbada' },
-      { name: 'White Jalabiya', quantity: 1, price: '₦25,000.00', image: 'https://placehold.co/100/EAEAEA/1A1A1A?text=Jalabiya' }
-    ] 
-  },
-  { 
-    id: '#4490-11', 
-    date: 'Sep 28, 2024', 
-    status: 'In Transit', 
-    total: '₦45,000.00', 
-    items: [
-      { name: 'Emirate Black Kaftan', quantity: 1, price: '₦45,000.00', image: 'https://placehold.co/100/000/FFF?text=Kaftan' }
-    ]
-  },
-  { 
-    id: '#4102-09', 
-    date: 'Aug 15, 2024', 
-    status: 'Delivered', 
-    total: '₦12,000.00', 
-    items: [
-      { name: 'Zanna Cap', quantity: 1, price: '₦12,000.00', image: 'https://placehold.co/100/333/FFF?text=Cap' }
-    ]
-  },
-];
-
-const INITIAL_ADDRESSES: Address[] = [
-  {
-    id: '1',
-    type: 'Home',
-    name: 'Ibrahim Al-Fayed',
-    address: '123 Andal Avenue, Lekki Phase 1',
-    city: 'Lagos',
-    state: 'Lagos State',
-    phone: '+234 800 123 4567',
-    isDefault: true
-  },
-  {
-    id: '2',
-    type: 'Office',
-    name: 'Ibrahim Al-Fayed',
-    address: '456 Trade Center, CBD',
-    city: 'Abuja',
-    state: 'FCT',
-    phone: '+234 809 987 6543',
-    isDefault: false
-  }
-];
+// Orders and addresses will be stored per user - starting with empty arrays
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
@@ -95,16 +43,21 @@ export const Account: React.FC<{
   onLogout?: () => void;
   wishlist?: string[];
   toggleWishlist?: (id: string) => void;
-}> = ({ onNavigate, params, onLogout, wishlist = [], toggleWishlist }) => {
+  user?: { name: string; email: string } | null;
+}> = ({ onNavigate, params, onLogout, wishlist = [], toggleWishlist, user }) => {
   const currentView = params?.view || 'profile';
 
   // --- ORDER STATE ---
+  const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showTracking, setShowTracking] = useState(false);
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
 
   // --- ADDRESS STATE ---
-  const [addresses, setAddresses] = useState<Address[]>(INITIAL_ADDRESSES);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  
+  // --- USER PROFILE STATE ---
+  const [passwordLastChanged, setPasswordLastChanged] = useState<string | null>(null);
   const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [addressForm, setAddressForm] = useState({
@@ -213,8 +166,8 @@ export const Account: React.FC<{
                <span className="material-symbols-outlined text-gray-500">person</span>
             </div>
             <div>
-              <p className="font-bold text-sm">Ibrahim Al-Fayed</p>
-              <p className="text-xs text-gray-500">ibrahim@email.com</p>
+              <p className="font-bold text-sm">{user?.name || 'User'}</p>
+              <p className="text-xs text-gray-500">{user?.email || 'No email'}</p>
             </div>
           </div>
         </div>
@@ -269,8 +222,8 @@ export const Account: React.FC<{
                   <h2 className="text-sm text-gray-500 mb-2">Personal Information</h2>
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="font-bold text-lg">Ibrahim Al-Fayed</p>
-                      <p className="text-gray-500">ibrahim@email.com</p>
+                      <p className="font-bold text-lg">{user?.name || 'Not set'}</p>
+                      <p className="text-gray-500">{user?.email || 'No email'}</p>
                     </div>
                     <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium">Edit</button>
                   </div>
@@ -281,7 +234,9 @@ export const Account: React.FC<{
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-bold text-lg tracking-widest">••••••••••••</p>
-                      <p className="text-gray-500 text-sm">Last changed 3 months ago</p>
+                      <p className="text-gray-500 text-sm">
+                        {passwordLastChanged ? `Last changed ${passwordLastChanged}` : 'Password not set'}
+                      </p>
                     </div>
                     <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium">Change Password</button>
                   </div>
@@ -296,8 +251,9 @@ export const Account: React.FC<{
               {!selectedOrder ? (
                 <>
                   <h1 className="text-3xl font-bold mb-8">My Orders</h1>
-                  <div className="space-y-6">
-                    {MOCK_ORDERS.map((order, i) => (
+                  {orders.length > 0 ? (
+                    <div className="space-y-6">
+                      {orders.map((order, i) => (
                       <div key={i} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-sm transition-shadow">
                         <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
                           <div>
@@ -327,8 +283,15 @@ export const Account: React.FC<{
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                      <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">shopping_bag</span>
+                      <p className="text-gray-500 mb-6">You have no orders yet.</p>
+                      <Button onClick={() => onNavigate(Page.SHOP)}>Start Shopping</Button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="animate-fade-in">
@@ -381,20 +344,20 @@ export const Account: React.FC<{
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="bg-white p-6 rounded-xl border border-gray-200">
                       <h3 className="font-bold mb-4">Shipping Address</h3>
-                      <p className="text-gray-600 text-sm leading-relaxed">
-                        Ibrahim Al-Fayed<br/>
-                        123 Andal Avenue, Lekki Phase 1<br/>
-                        Lagos, Lagos State<br/>
-                        Nigeria<br/>
-                        +234 800 123 4567
-                      </p>
+                      {selectedOrder && addresses.find(a => a.isDefault) ? (
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                          {addresses.find(a => a.isDefault)?.name}<br/>
+                          {addresses.find(a => a.isDefault)?.address}<br/>
+                          {addresses.find(a => a.isDefault)?.city}, {addresses.find(a => a.isDefault)?.state}<br/>
+                          {addresses.find(a => a.isDefault)?.phone}
+                        </p>
+                      ) : (
+                        <p className="text-gray-500 text-sm">No address on file for this order</p>
+                      )}
                     </div>
                     <div className="bg-white p-6 rounded-xl border border-gray-200">
                       <h3 className="font-bold mb-4">Payment Method</h3>
-                      <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-gray-400">credit_card</span>
-                        <p className="text-gray-600 text-sm">Visa ending in 4242</p>
-                      </div>
+                      <p className="text-gray-500 text-sm">Payment information not available</p>
                     </div>
                   </div>
                 </div>
@@ -446,7 +409,9 @@ export const Account: React.FC<{
             <>
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Addresses</h1>
-                <Button onClick={openNewAddress} className="text-sm px-4 h-10">Add New</Button>
+                {!isAddressFormOpen && (
+                  <Button onClick={openNewAddress} className="text-sm px-4 h-10">Add New</Button>
+                )}
               </div>
 
               {isAddressFormOpen ? (
@@ -526,7 +491,7 @@ export const Account: React.FC<{
                     </div>
                   </form>
                 </div>
-              ) : (
+              ) : addresses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {addresses.map(addr => (
                     <div key={addr.id} className="bg-white p-6 rounded-xl border border-gray-200 relative group">
@@ -551,6 +516,12 @@ export const Account: React.FC<{
                       </div>
                     </div>
                   ))}
+                </div>
+              ) : (
+                <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                  <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">home</span>
+                  <p className="text-gray-500 mb-6">You have no saved addresses.</p>
+                  <Button onClick={openNewAddress}>Add Your First Address</Button>
                 </div>
               )}
             </>

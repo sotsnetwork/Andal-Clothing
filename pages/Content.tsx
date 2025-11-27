@@ -203,3 +203,170 @@ export const HelpCenter: React.FC = () => (
     </div>
   </div>
 );
+
+// --- SHIPPING & RETURNS ---
+export const ShippingReturns: React.FC = () => (
+  <div className="max-w-4xl mx-auto px-6 py-16">
+    <h1 className="text-4xl font-serif font-bold mb-10">Shipping & Returns</h1>
+    
+    <div className="space-y-12">
+      <section>
+        <h2 className="text-2xl font-bold mb-4">Shipping Policy</h2>
+        <p className="text-gray-600 mb-4 leading-relaxed">
+          We offer worldwide shipping via DHL Express and local deliveries within Nigeria via trusted courier partners.
+        </p>
+        <ul className="list-disc pl-5 text-gray-600 space-y-2">
+          <li><strong>Local Delivery (Nigeria):</strong> 3-5 business days.</li>
+          <li><strong>International Shipping:</strong> 5-10 business days depending on location.</li>
+          <li><strong>Processing Time:</strong> Orders are processed within 24-48 hours. Custom orders may take longer.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 className="text-2xl font-bold mb-4">Return Policy</h2>
+        <p className="text-gray-600 mb-4 leading-relaxed">
+          We want you to be completely satisfied with your Andal Clothing purchase. If you are not happy with your order, we accept returns within 14 days of delivery.
+        </p>
+        <ul className="list-disc pl-5 text-gray-600 space-y-2">
+          <li>Items must be unworn, unwashed, and with original tags attached.</li>
+          <li>Custom-tailored items are final sale and cannot be returned unless there is a defect.</li>
+          <li>Return shipping costs are the responsibility of the customer unless the item is defective.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+);
+
+// --- CARE INSTRUCTIONS ---
+export const CareInstructions: React.FC = () => (
+  <div className="max-w-4xl mx-auto px-6 py-16">
+    <h1 className="text-4xl font-serif font-bold mb-10">Care Instructions</h1>
+    
+    <div className="grid md:grid-cols-2 gap-10">
+      <div className="bg-gray-50 p-8 rounded-xl">
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined">dry_cleaning</span> Agbadas & Embroidered Items
+        </h2>
+        <p className="text-gray-600 leading-relaxed">
+          Due to the intricate hand-embroidery on our Agbadas and Kaftans, we highly recommend <strong>Dry Clean Only</strong>. Do not bleach or tumble dry. Iron on low heat, preferably inside out or with a protective cloth over the embroidery.
+        </p>
+      </div>
+      
+      <div className="bg-gray-50 p-8 rounded-xl">
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined">wash</span> Cotton & Voile Fabrics
+        </h2>
+        <p className="text-gray-600 leading-relaxed">
+          For plain Jalabiyas and fabrics, gentle hand wash in cold water is suitable. Use mild detergent. Hang dry in shade to preserve color vibrancy.
+        </p>
+      </div>
+
+      <div className="bg-gray-50 p-8 rounded-xl">
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined">checkroom</span> Fila (Caps)
+        </h2>
+        <p className="text-gray-600 leading-relaxed">
+          Spot clean only with a damp cloth. Do not crush. Store in a cool, dry place to maintain shape.
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+// --- SIZE GUIDE ---
+export const SizeGuide: React.FC = () => (
+  <div className="max-w-5xl mx-auto px-6 py-16">
+    <h1 className="text-4xl font-serif font-bold mb-10 text-center">Size Guide</h1>
+    <p className="text-center text-gray-600 max-w-2xl mx-auto mb-16">
+      Our traditional wear is designed for a relaxed, majestic fit. Use the chart below to find your perfect size.
+    </p>
+
+    <div className="overflow-x-auto">
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="bg-black text-white">
+            <th className="p-4 border border-gray-800">Size</th>
+            <th className="p-4 border border-gray-800">Chest (Inches)</th>
+            <th className="p-4 border border-gray-800">Shoulder (Inches)</th>
+            <th className="p-4 border border-gray-800">Sleeve Length (Inches)</th>
+            <th className="p-4 border border-gray-800">Length (Inches)</th>
+          </tr>
+        </thead>
+        <tbody className="text-gray-700">
+          {[
+            { size: 'S', chest: '38-40', shoulder: '18', sleeve: '24', length: '58' },
+            { size: 'M', chest: '40-42', shoulder: '19', sleeve: '25', length: '60' },
+            { size: 'L', chest: '42-44', shoulder: '20', sleeve: '26', length: '62' },
+            { size: 'XL', chest: '46-48', shoulder: '21', sleeve: '27', length: '64' },
+            { size: 'XXL', chest: '50-52', shoulder: '22', sleeve: '28', length: '66' },
+          ].map((row, i) => (
+            <tr key={i} className="even:bg-gray-50">
+              <td className="p-4 border border-gray-200 font-bold">{row.size}</td>
+              <td className="p-4 border border-gray-200">{row.chest}</td>
+              <td className="p-4 border border-gray-200">{row.shoulder}</td>
+              <td className="p-4 border border-gray-200">{row.sleeve}</td>
+              <td className="p-4 border border-gray-200">{row.length}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div className="mt-12 bg-blue-50 p-6 rounded-lg text-sm text-blue-800">
+      <p className="font-bold mb-2">Note on Custom Sizing:</p>
+      <p>Don't see your size? We offer bespoke tailoring services. Contact us at <a href="mailto:concierge@andalclothing.com" className="underline">concierge@andalclothing.com</a> for a custom fit consultation.</p>
+    </div>
+  </div>
+);
+
+// --- PRIVACY POLICY ---
+export const PrivacyPolicy: React.FC = () => (
+  <div className="max-w-4xl mx-auto px-6 py-16">
+    <h1 className="text-4xl font-serif font-bold mb-10">Privacy Policy</h1>
+    <div className="space-y-8 text-gray-600 leading-relaxed">
+      <p>Last updated: October 2024</p>
+      <p>
+        At Andal Clothing, we value your privacy and are committed to protecting your personal data. This policy outlines how we collect, use, and safeguard your information.
+      </p>
+      
+      <h2 className="text-xl font-bold text-black mt-8">Information We Collect</h2>
+      <p>We collect information you provide directly to us, such as when you create an account, make a purchase, or sign up for our newsletter. This includes your name, email address, shipping address, and payment information.</p>
+
+      <h2 className="text-xl font-bold text-black mt-8">How We Use Your Information</h2>
+      <ul className="list-disc pl-5 space-y-2">
+        <li>To process and fulfill your orders.</li>
+        <li>To communicate with you about your order status.</li>
+        <li>To send you marketing communications (if you have opted in).</li>
+        <li>To improve our website and customer service.</li>
+      </ul>
+
+      <h2 className="text-xl font-bold text-black mt-8">Data Security</h2>
+      <p>We implement a variety of security measures to maintain the safety of your personal information. Your payment information is processed securely through trusted payment gateways and is not stored on our servers.</p>
+    </div>
+  </div>
+);
+
+// --- TERMS OF SERVICE ---
+export const TermsOfService: React.FC = () => (
+  <div className="max-w-4xl mx-auto px-6 py-16">
+    <h1 className="text-4xl font-serif font-bold mb-10">Terms of Service</h1>
+    <div className="space-y-8 text-gray-600 leading-relaxed">
+      <p>Last updated: October 2024</p>
+      <p>
+        Welcome to Andal Clothing. By accessing or using our website, you agree to be bound by these Terms of Service.
+      </p>
+      
+      <h2 className="text-xl font-bold text-black mt-8">Use of Our Service</h2>
+      <p>You agree to use our website for lawful purposes only. You must not use our site to transmit any malicious code or interfere with the functionality of the service.</p>
+
+      <h2 className="text-xl font-bold text-black mt-8">Product Information</h2>
+      <p>We make every effort to display as accurately as possible the colors and images of our products. However, we cannot guarantee that your computer monitor's display of any color will be accurate.</p>
+
+      <h2 className="text-xl font-bold text-black mt-8">Pricing</h2>
+      <p>Prices for our products are subject to change without notice. We reserve the right at any time to modify or discontinue the Service (or any part or content thereof) without notice at any time.</p>
+
+      <h2 className="text-xl font-bold text-black mt-8">Intellectual Property</h2>
+      <p>All content on this website, including text, graphics, logos, and images, is the property of Andal Clothing and is protected by copyright laws.</p>
+    </div>
+  </div>
+);

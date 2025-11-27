@@ -200,6 +200,8 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
   const [sortOption, setSortOption] = useState<string>('newest');
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
   
   // Quick View State
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
@@ -209,6 +211,17 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
   useEffect(() => {
     setLocalSearchQuery(params?.search || '');
   }, [params]);
+
+  // Handle outside click for search suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -229,6 +242,7 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
   const handleSuggestionClick = (suggestion: string) => {
     setLocalSearchQuery(suggestion);
     setSearchSuggestions([]);
+    setIsSearchFocused(false);
   };
 
   const filteredProducts = PRODUCTS.filter(p => {
@@ -369,7 +383,7 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
         {/* Main Content */}
         <div className="flex-1">
           {/* Enhanced Search Bar */}
-          <div className="mb-8 relative max-w-xl">
+          <div className="mb-8 relative max-w-xl" ref={searchContainerRef}>
              <div className="relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                 <input 
@@ -378,7 +392,6 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
                   value={localSearchQuery}
                   onChange={handleSearchChange}
                   onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 />
              </div>
              {/* Autocomplete Suggestions */}
@@ -446,7 +459,13 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
           {sortedProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
               {sortedProducts.map(product => (
-                <div key={product.id} className="group cursor-pointer relative" onClick={() => onNavigate(Page.PRODUCT, { id: product.id })}>
+                <div 
+                  key={product.id} 
+                  className={`group cursor-pointer relative transition-opacity duration-300 ${hoveredProductId && hoveredProductId !== product.id ? 'opacity-50' : 'opacity-100'}`}
+                  onClick={() => onNavigate(Page.PRODUCT, { id: product.id })}
+                  onMouseEnter={() => setHoveredProductId(product.id)}
+                  onMouseLeave={() => setHoveredProductId(null)}
+                >
                   <div className="aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-4 relative">
                     <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     {product.isNew && <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 text-[10px] font-bold uppercase tracking-wider z-10">New Arrival</span>}
@@ -609,7 +628,7 @@ export const ProductDetail: React.FC<{
   const handleAddToCart = () => {
     if (addToCart) {
       addToCart(product, selectedSize, selectedColor);
-      onNavigate(Page.CART);
+      // Removed automatic navigation to cart, now shows mini-cart in layout
     }
   };
 
@@ -816,6 +835,22 @@ export const ProductDetail: React.FC<{
         </div>
       </div>
 
+      {/* Customers Also Bought Section */}
+      <div className="mt-20 border-t border-gray-200 pt-16">
+        <h2 className="text-3xl font-serif font-bold mb-10">Customers Also Bought</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {PRODUCTS.filter(p => p.id !== product.id).slice(0, 4).map(p => (
+                <div key={p.id} className="group cursor-pointer" onClick={() => onNavigate(Page.PRODUCT, { id: p.id })}>
+                    <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden mb-3">
+                        <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                    <h3 className="font-medium text-sm">{p.name}</h3>
+                    <p className="text-gray-500 text-sm">{formatCurrency(p.price)}</p>
+                </div>
+            ))}
+        </div>
+      </div>
+
       {/* Recently Viewed */}
       {recentlyViewed.length > 0 && (
         <div className="mt-24 border-t border-gray-200 pt-16">
@@ -834,7 +869,7 @@ export const ProductDetail: React.FC<{
         </div>
       )}
 
-      {/* Recommendations */}
+      {/* Recommendations / Complete the Look */}
       <div className="mt-24">
         <h2 className="text-3xl font-serif font-bold text-center mb-12">Complete The Look</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

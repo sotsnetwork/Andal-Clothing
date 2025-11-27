@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Page } from '../types';
+import { Page, CartItem } from '../types';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -7,6 +7,9 @@ interface LayoutProps {
   onNavigate: (page: Page, params?: any) => void;
   isAuthenticated?: boolean;
   cartCount?: number;
+  showMiniCart?: boolean;
+  lastAddedItem?: CartItem | null;
+  onCloseMiniCart?: () => void;
 }
 
 export const Header: React.FC<{ onNavigate: (page: Page, params?: any) => void; cartCount: number; isAuthenticated?: boolean }> = ({ onNavigate, cartCount, isAuthenticated }) => {
@@ -151,9 +154,9 @@ export const Footer: React.FC<{ onNavigate: (page: Page, params?: any) => void }
             <h4 className="font-bold mb-6 text-sm uppercase tracking-wider">Support</h4>
             <ul className="space-y-3 text-sm text-gray-400">
               <li><button onClick={() => onNavigate(Page.CONTACT)} className="hover:text-white transition-colors">Contact Us</button></li>
-              <li><button className="hover:text-white transition-colors">Shipping & Returns</button></li>
-              <li><button className="hover:text-white transition-colors">Care Instructions</button></li>
-              <li><button className="hover:text-white transition-colors">Size Guide</button></li>
+              <li><button onClick={() => onNavigate(Page.SHIPPING)} className="hover:text-white transition-colors">Shipping & Returns</button></li>
+              <li><button onClick={() => onNavigate(Page.CARE_INSTRUCTIONS)} className="hover:text-white transition-colors">Care Instructions</button></li>
+              <li><button onClick={() => onNavigate(Page.SIZE_GUIDE)} className="hover:text-white transition-colors">Size Guide</button></li>
             </ul>
           </div>
         </div>
@@ -161,8 +164,8 @@ export const Footer: React.FC<{ onNavigate: (page: Page, params?: any) => void }
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
           <p>© 2024 Andal Clothing. All rights reserved.</p>
           <div className="flex gap-6">
-            <button className="hover:text-white transition-colors">Privacy Policy</button>
-            <button className="hover:text-white transition-colors">Terms of Service</button>
+            <button onClick={() => onNavigate(Page.PRIVACY)} className="hover:text-white transition-colors">Privacy Policy</button>
+            <button onClick={() => onNavigate(Page.TERMS)} className="hover:text-white transition-colors">Terms of Service</button>
           </div>
         </div>
       </div>
@@ -252,10 +255,60 @@ export const BackToTop: React.FC = () => {
   );
 };
 
-export const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate, isAuthenticated, cartCount = 0 }) => {
+export const MiniCartNotification: React.FC<{ item: CartItem; onClose: () => void; onNavigate: (page: Page) => void }> = ({ item, onClose, onNavigate }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
+  }, [item, onClose]);
+
+  return (
+    <div className="fixed top-24 right-6 md:right-10 z-[60] bg-white rounded-lg shadow-2xl border border-gray-100 p-4 w-80 animate-fade-in">
+      <div className="flex justify-between items-center mb-3">
+        <span className="text-sm font-bold text-green-600 flex items-center gap-1">
+          <span className="material-symbols-outlined text-base">check_circle</span>
+          Added to Bag
+        </span>
+        <button onClick={onClose} className="text-gray-400 hover:text-black">
+          <span className="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+      <div className="flex gap-3 mb-4">
+        <img src={item.image} alt={item.name} className="w-12 h-16 object-cover rounded bg-gray-50" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{item.name}</p>
+          <p className="text-xs text-gray-500">{item.selectedColor} / {item.selectedSize}</p>
+        </div>
+      </div>
+      <Button 
+        onClick={() => { onClose(); onNavigate(Page.CART); }} 
+        className="w-full h-10 text-sm"
+      >
+        Checkout
+      </Button>
+    </div>
+  );
+};
+
+export const Layout: React.FC<LayoutProps> = ({ 
+  children, 
+  activePage, 
+  onNavigate, 
+  isAuthenticated, 
+  cartCount = 0,
+  showMiniCart = false,
+  lastAddedItem = null,
+  onCloseMiniCart = () => {}
+}) => {
   return (
     <div className="min-h-screen flex flex-col bg-white relative">
       <Header onNavigate={onNavigate} cartCount={cartCount} isAuthenticated={isAuthenticated} />
+      {showMiniCart && lastAddedItem && (
+        <MiniCartNotification 
+          item={lastAddedItem} 
+          onClose={onCloseMiniCart} 
+          onNavigate={onNavigate} 
+        />
+      )}
       <main className="flex-grow animate-fade-in">
         {children}
       </main>

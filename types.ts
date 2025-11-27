@@ -43,4 +43,10 @@ export enum Page {
   SIGNUP = 'signup',
   FORGOT_PASSWORD = 'forgot_password',
   NEW_PASSWORD = 'new_password',
+  // Policy & Guide Pages
+  SHIPPING = 'shipping',
+  CARE_INSTRUCTIONS = 'care_instructions',
+  SIZE_GUIDE = 'size_guide',
+  PRIVACY = 'privacy',
+  TERMS = 'terms',
 }

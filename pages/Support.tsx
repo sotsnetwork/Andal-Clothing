@@ -197,6 +197,13 @@ export const Account: React.FC<{
     setShowTracking(true);
   };
 
+  // Helper to calculate estimated delivery (Mock: 7 days after order date)
+  const getEstimatedDelivery = (orderDate: string) => {
+    const date = new Date(orderDate);
+    date.setDate(date.getDate() + 7);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   return (
     <div className="flex min-h-[80vh] bg-gray-50">
       <aside className="w-64 bg-white border-r border-gray-200 hidden md:block">
@@ -332,6 +339,12 @@ export const Account: React.FC<{
                     <div>
                       <h1 className="text-3xl font-bold mb-2">Order {selectedOrder.id}</h1>
                       <p className="text-gray-600">Placed on {selectedOrder.date}</p>
+                      {selectedOrder.status === 'In Transit' && (
+                          <p className="text-green-600 font-medium mt-2 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-base">local_shipping</span>
+                              Estimated Delivery: {getEstimatedDelivery(selectedOrder.date)}
+                          </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-4">
                         {selectedOrder.status === 'In Transit' && (

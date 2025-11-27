@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Page, CartItem, Product, Review } from './types';
 import { Layout } from './components/Shared';
 import { Home, Shop, ProductDetail, Cart, CheckoutSuccess, PRODUCTS } from './pages/ShopPages';
-import { About, Journal, Sustainability, Careers, HelpCenter } from './pages/Content';
+import { About, Journal, Sustainability, Careers, HelpCenter, ShippingReturns, CareInstructions, SizeGuide, PrivacyPolicy, TermsOfService } from './pages/Content';
 import { Account, Contact, Press } from './pages/Support';
 import { SignIn, SignUp, ForgotPassword, NewPassword } from './pages/Auth';
 
@@ -12,6 +12,10 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
+  
+  // Mini Cart State
+  const [showMiniCart, setShowMiniCart] = useState(false);
+  const [lastAddedItem, setLastAddedItem] = useState<CartItem | null>(null);
   
   // State to hold reviews map: ProductID -> Review[]
   // Initialized with empty array for now, logic adds to it.
@@ -54,18 +58,27 @@ const App: React.FC = () => {
         item.selectedColor === color
       );
 
+      let newCart;
+      let addedItem: CartItem;
+
       if (existingItem) {
-        return prev.map(item => 
+        addedItem = { ...existingItem, quantity: existingItem.quantity + 1 };
+        newCart = prev.map(item => 
           (item.id === product.id && item.selectedSize === size && item.selectedColor === color)
-            ? { ...item, quantity: item.quantity + 1 }
+            ? addedItem
             : item
         );
+      } else {
+        addedItem = { ...product, quantity: 1, selectedSize: size, selectedColor: color };
+        newCart = [...prev, addedItem];
       }
-
-      return [...prev, { ...product, quantity: 1, selectedSize: size, selectedColor: color }];
+      
+      setLastAddedItem(addedItem);
+      return newCart;
     });
-    // Optional: Navigate to cart or show toast
-    // navigate(Page.CART); 
+    
+    // Trigger Mini Cart
+    setShowMiniCart(true);
   };
 
   const updateQuantity = (itemId: string, size: string, color: string, delta: number) => {
@@ -143,7 +156,15 @@ const App: React.FC = () => {
   }, [page, params]);
 
   return (
-    <Layout activePage={page} onNavigate={navigate} isAuthenticated={isAuthenticated} cartCount={cartCount}>
+    <Layout 
+      activePage={page} 
+      onNavigate={navigate} 
+      isAuthenticated={isAuthenticated} 
+      cartCount={cartCount}
+      showMiniCart={showMiniCart}
+      lastAddedItem={lastAddedItem}
+      onCloseMiniCart={() => setShowMiniCart(false)}
+    >
       {page === Page.HOME && <Home onNavigate={navigate} />}
       {page === Page.SHOP && (
         <Shop 
@@ -191,37 +212,18 @@ const App: React.FC = () => {
       {page === Page.CAREERS && <Careers />}
       {page === Page.PRESS && <Press />}
       
+      {/* New Pages */}
+      {page === Page.SHIPPING && <ShippingReturns />}
+      {page === Page.CARE_INSTRUCTIONS && <CareInstructions />}
+      {page === Page.SIZE_GUIDE && <SizeGuide />}
+      {page === Page.PRIVACY && <PrivacyPolicy />}
+      {page === Page.TERMS && <TermsOfService />}
+
       {/* Auth Pages */}
       {page === Page.LOGIN && <SignIn onNavigate={navigate} onLogin={handleLogin} />}
       {page === Page.SIGNUP && <SignUp onNavigate={navigate} onLogin={handleLogin} />}
       {page === Page.FORGOT_PASSWORD && <ForgotPassword onNavigate={navigate} />}
       {page === Page.NEW_PASSWORD && <NewPassword onNavigate={navigate} />}
-
-      {(page !== Page.HOME && 
-        page !== Page.SHOP && 
-        page !== Page.PRODUCT && 
-        page !== Page.CART && 
-        page !== Page.CHECKOUT_SUCCESS &&
-        page !== Page.ACCOUNT &&
-        page !== Page.ABOUT &&
-        page !== Page.CONTACT &&
-        page !== Page.JOURNAL &&
-        page !== Page.SUSTAINABILITY &&
-        page !== Page.CAREERS &&
-        page !== Page.PRESS &&
-        page !== Page.LOGIN &&
-        page !== Page.SIGNUP &&
-        page !== Page.FORGOT_PASSWORD &&
-        page !== Page.NEW_PASSWORD
-       ) && (
-        <div className="flex items-center justify-center h-[50vh]">
-          <div className="text-center">
-            <h1 className="text-4xl font-serif mb-4">Coming Soon</h1>
-            <p className="text-gray-500 mb-8">This page is under construction.</p>
-            <button onClick={() => navigate(Page.HOME)} className="bg-black text-white px-6 py-3 rounded">Return Home</button>
-          </div>
-        </div>
-      )}
     </Layout>
   );
 };

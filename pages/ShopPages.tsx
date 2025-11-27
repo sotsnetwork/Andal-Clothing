@@ -1,21 +1,105 @@
-import React, { useState } from 'react';
-import { Product, Page, CartItem } from '../types';
-import { Button } from '../components/Shared';
+import React, { useState, useEffect, useRef } from 'react';
+import { Product, Page, CartItem, Review } from '../types';
+import { Button, Modal, Input } from '../components/Shared';
 
 // --- MOCK DATA ---
-const PRODUCTS: Product[] = [
-  { id: '1', name: 'Royal Grand Agbada', price: 150000, category: 'Agbadas', image: 'https://placehold.co/800x1000/1a1a1a/FFF?text=Royal+Agbada', isNew: true, collection: 'Eid', colors: ['Black', 'Navy', 'Gold'] },
-  { id: '2', name: 'Premium White Jalabiya', price: 25000, category: 'Jalabiyas', image: 'https://placehold.co/800x1000/EAEAEA/1A1A1A?text=White+Jalabiya', colors: ['White', 'Cream'] },
-  { id: '3', name: 'Hand-Embroidered Zanna Cap', price: 12000, category: 'Caps', image: 'https://placehold.co/800x1000/333/FFF?text=Zanna+Cap', colors: ['Black', 'White', 'Multi'] },
-  { id: '4', name: 'Swiss Voile Fabric - Navy', price: 30000, category: 'Fabrics', image: 'https://placehold.co/800x1000/172554/FFF?text=Swiss+Voile', collection: 'Textiles', colors: ['Navy'] },
-  { id: '5', name: 'Emirate Black Kaftan', price: 45000, category: 'Kaftan', image: 'https://placehold.co/800x1000/000/FFF?text=Black+Kaftan', colors: ['Black'] },
-  { id: '6', name: 'Classic Hausa Fila', price: 8000, category: 'Caps', image: 'https://placehold.co/800x1000/666/FFF?text=Hausa+Fila', colors: ['Cream', 'Brown'] },
-  { id: '7', name: 'Atiku Jacquard Fabric', price: 28000, category: 'Fabrics', image: 'https://placehold.co/800x1000/e5e5e5/333?text=Atiku+Fabric', colors: ['White', 'Cream', 'Silver'] },
-  { id: '8', name: 'Ceremonial Gold Agbada', price: 210000, category: 'Agbadas', image: 'https://placehold.co/800x1000/B8860B/FFF?text=Gold+Agbada', isNew: true, colors: ['Gold', 'Brown'] },
+export const PRODUCTS: Product[] = [
+  { 
+    id: '1', 
+    name: 'Royal Grand Agbada', 
+    price: 150000, 
+    category: 'Agbadas', 
+    image: 'https://placehold.co/800x1000/1a1a1a/FFF?text=Royal+Agbada', 
+    isNew: true, 
+    collection: 'Eid', 
+    colors: ['Black', 'Navy', 'Gold'],
+    description: "An embodiment of traditional elegance, this Agbada is crafted from the finest materials. Designed for the modern man who values heritage, comfort, and sophistication."
+  },
+  { 
+    id: '2', 
+    name: 'Premium White Jalabiya', 
+    price: 25000, 
+    category: 'Jalabiyas', 
+    image: 'https://placehold.co/800x1000/EAEAEA/1A1A1A?text=White+Jalabiya', 
+    colors: ['White', 'Cream'],
+    description: "Experience the purity of comfort with our Premium White Jalabiya, perfect for Friday prayers or casual gatherings."
+  },
+  { 
+    id: '3', 
+    name: 'Hand-Embroidered Zanna Cap', 
+    price: 12000, 
+    category: 'Caps', 
+    image: 'https://placehold.co/800x1000/333/FFF?text=Zanna+Cap', 
+    colors: ['Black', 'White', 'Multi'],
+    description: "A meticulously hand-woven cap that adds a crowning touch to any traditional outfit."
+  },
+  { 
+    id: '4', 
+    name: 'Swiss Voile Fabric - Navy', 
+    price: 30000, 
+    category: 'Fabrics', 
+    image: 'https://placehold.co/800x1000/172554/FFF?text=Swiss+Voile', 
+    collection: 'Textiles', 
+    colors: ['Navy'],
+    description: "High-grade Swiss Voile fabric, known for its breathability and durability. Ideal for custom tailoring."
+  },
+  { 
+    id: '5', 
+    name: 'Emirate Black Kaftan', 
+    price: 45000, 
+    category: 'Kaftan', 
+    image: 'https://placehold.co/800x1000/000/FFF?text=Black+Kaftan', 
+    colors: ['Black'],
+    description: "Sleek, stylish, and commanding. The Emirate Black Kaftan is a staple for the contemporary gentleman."
+  },
+  { 
+    id: '6', 
+    name: 'Classic Hausa Fila', 
+    price: 8000, 
+    category: 'Caps', 
+    image: 'https://placehold.co/800x1000/666/FFF?text=Hausa+Fila', 
+    colors: ['Cream', 'Brown'],
+    description: "Traditional Hausa Fila cap, representing culture and prestige."
+  },
+  { 
+    id: '7', 
+    name: 'Atiku Jacquard Fabric', 
+    price: 28000, 
+    category: 'Fabrics', 
+    image: 'https://placehold.co/800x1000/e5e5e5/333?text=Atiku+Fabric', 
+    colors: ['White', 'Cream', 'Silver'],
+    description: "Luxurious Atiku Jacquard fabric with subtle patterns for a refined look."
+  },
+  { 
+    id: '8', 
+    name: 'Ceremonial Gold Agbada', 
+    price: 210000, 
+    category: 'Agbadas', 
+    image: 'https://placehold.co/800x1000/B8860B/FFF?text=Gold+Agbada', 
+    isNew: true, 
+    colors: ['Gold', 'Brown'],
+    description: "Stand out in any ceremony with this opulent Gold Agbada, featuring heavy embroidery."
+  },
 ];
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
+};
+
+// --- HELPER: Fuzzy Matching ---
+const getLevenshteinDistance = (a: string, b: string) => {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+  for (let i = 0; i <= b.length; i++) matrix[i][0] = i;
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      const cost = b.charAt(i - 1) === a.charAt(j - 1) ? 0 : 1;
+      matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
+    }
+  }
+  return matrix[b.length][a.length];
 };
 
 // --- HOME PAGE ---
@@ -100,12 +184,53 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
 };
 
 // --- SHOP PAGE (PLP) ---
-export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; params?: any }> = ({ onNavigate, params }) => {
+interface ShopProps {
+  onNavigate: (page: Page, params?: any) => void;
+  params?: any;
+  wishlist?: string[];
+  toggleWishlist?: (id: string) => void;
+  addToCart?: (product: Product, size: string, color: string) => void;
+}
+
+export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggleWishlist, addToCart }) => {
   const currentCategory = params?.category || 'All';
-  const searchQuery = params?.search || '';
+  const initialSearch = params?.search || '';
+  const [localSearchQuery, setLocalSearchQuery] = useState(initialSearch);
   const [activeColor, setActiveColor] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<string>('newest');
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   
+  // Quick View State
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [qvSize, setQvSize] = useState('M');
+  const [qvColor, setQvColor] = useState('Black');
+
+  useEffect(() => {
+    setLocalSearchQuery(params?.search || '');
+  }, [params]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setLocalSearchQuery(query);
+    
+    if (query.length > 1) {
+      const suggestions = new Set<string>();
+      PRODUCTS.forEach(p => {
+        if (p.name.toLowerCase().includes(query.toLowerCase())) suggestions.add(p.name);
+        if (p.category.toLowerCase().includes(query.toLowerCase())) suggestions.add(p.category);
+      });
+      setSearchSuggestions(Array.from(suggestions).slice(0, 5));
+    } else {
+      setSearchSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setLocalSearchQuery(suggestion);
+    setSearchSuggestions([]);
+  };
+
   const filteredProducts = PRODUCTS.filter(p => {
     // Category Filter
     let categoryMatch = false;
@@ -119,10 +244,28 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
       categoryMatch = p.category === currentCategory;
     }
 
-    // Search Filter
-    const searchMatch = searchQuery 
-      ? p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+    // Search Filter with Fuzzy Logic
+    const searchMatch = localSearchQuery 
+      ? (() => {
+          const q = localSearchQuery.toLowerCase();
+          const n = p.name.toLowerCase();
+          const d = (p.description || '').toLowerCase();
+          const c = p.category.toLowerCase();
+          
+          // Direct match
+          if (n.includes(q) || d.includes(q) || c.includes(q)) return true;
+          
+          // Fuzzy match on individual words
+          const words = [...n.split(/\s+/), ...c.split(/\s+/)];
+          const queryWords = q.split(/\s+/);
+          
+          return queryWords.every(qw => 
+            words.some(w => {
+               if (Math.abs(w.length - qw.length) > 2) return false;
+               return getLevenshteinDistance(w, qw) <= 2;
+            })
+          );
+        })()
       : true;
 
     // Color Filter
@@ -135,7 +278,7 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortOption === 'price-asc') return a.price - b.price;
     if (sortOption === 'price-desc') return b.price - a.price;
-    return 0; // Default to natural order (or mock newness)
+    return 0; // Default to natural order
   });
 
   const colorPalette = [
@@ -148,7 +291,22 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
 
   const handleClearFilters = () => {
     setActiveColor(null);
-    onNavigate(Page.SHOP); // Resets category and search
+    setLocalSearchQuery('');
+    onNavigate(Page.SHOP); // Resets category
+  };
+
+  const openQuickView = (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation();
+    setQuickViewProduct(product);
+    setQvColor(product.colors?.[0] || 'Black');
+    setQvSize('M');
+  };
+
+  const handleQuickViewAddToCart = () => {
+    if (quickViewProduct && addToCart) {
+      addToCart(quickViewProduct, qvSize, qvColor);
+      setQuickViewProduct(null);
+    }
   };
 
   return (
@@ -210,6 +368,35 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
 
         {/* Main Content */}
         <div className="flex-1">
+          {/* Enhanced Search Bar */}
+          <div className="mb-8 relative max-w-xl">
+             <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                <input 
+                  className="w-full h-12 pl-12 pr-4 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:bg-white transition-all"
+                  placeholder="Search products by name, category..."
+                  value={localSearchQuery}
+                  onChange={handleSearchChange}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                />
+             </div>
+             {/* Autocomplete Suggestions */}
+             {isSearchFocused && searchSuggestions.length > 0 && (
+               <div className="absolute top-full left-0 w-full bg-white border border-gray-100 shadow-lg rounded-lg mt-1 z-20">
+                 {searchSuggestions.map((suggestion, idx) => (
+                   <div 
+                    key={idx} 
+                    className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                   >
+                     {suggestion}
+                   </div>
+                 ))}
+               </div>
+             )}
+          </div>
+
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
               <div className="flex gap-2 text-sm text-gray-500 mb-2">
@@ -217,7 +404,7 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
                 <span className="text-black">{currentCategory}</span>
               </div>
               <h1 className="text-4xl font-serif font-bold">
-                {searchQuery ? `Results for "${searchQuery}"` : (currentCategory === 'All' ? "Men's Traditional Wear" : currentCategory)}
+                {localSearchQuery ? `Results for "${localSearchQuery}"` : (currentCategory === 'All' ? "Men's Traditional Wear" : currentCategory)}
               </h1>
             </div>
             <div className="flex items-center gap-4">
@@ -234,17 +421,17 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
             </div>
           </div>
 
-          {/* Active Filters */}
-          {(currentCategory !== 'All' || searchQuery || activeColor) && (
+          {/* Active Filters Display */}
+          {(currentCategory !== 'All' || localSearchQuery || activeColor) && (
             <div className="flex gap-2 mb-8 flex-wrap">
               {currentCategory !== 'All' && (
                 <span className="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-2">
                   Category: {currentCategory} <span className="material-symbols-outlined text-sm cursor-pointer" onClick={() => onNavigate(Page.SHOP)}>close</span>
                 </span>
               )}
-              {searchQuery && (
+              {localSearchQuery && (
                 <span className="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-2">
-                  Search: "{searchQuery}" <span className="material-symbols-outlined text-sm cursor-pointer" onClick={() => onNavigate(Page.SHOP)}>close</span>
+                  Search: "{localSearchQuery}" <span className="material-symbols-outlined text-sm cursor-pointer" onClick={() => setLocalSearchQuery('')}>close</span>
                 </span>
               )}
               {activeColor && (
@@ -259,10 +446,29 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
           {sortedProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
               {sortedProducts.map(product => (
-                <div key={product.id} className="group cursor-pointer" onClick={() => onNavigate(Page.PRODUCT, { id: product.id })}>
+                <div key={product.id} className="group cursor-pointer relative" onClick={() => onNavigate(Page.PRODUCT, { id: product.id })}>
                   <div className="aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-4 relative">
                     <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    {product.isNew && <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 text-[10px] font-bold uppercase tracking-wider">New Arrival</span>}
+                    {product.isNew && <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 text-[10px] font-bold uppercase tracking-wider z-10">New Arrival</span>}
+                    
+                    {/* Hover Actions */}
+                    <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex gap-2">
+                      <Button 
+                        variant="secondary" 
+                        className="flex-1 h-10 text-sm shadow-lg" 
+                        onClick={(e) => openQuickView(e, product)}
+                      >
+                        Quick View
+                      </Button>
+                    </div>
+
+                    {/* Wishlist Button */}
+                    <button 
+                      className={`absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur shadow-sm hover:bg-white transition-colors z-10 ${wishlist?.includes(product.id) ? 'text-red-500' : 'text-gray-400'}`}
+                      onClick={(e) => { e.stopPropagation(); toggleWishlist && toggleWishlist(product.id); }}
+                    >
+                      <span className={`material-symbols-outlined ${wishlist?.includes(product.id) ? 'fill-current' : ''}`}>favorite</span>
+                    </button>
                   </div>
                   <div className="flex justify-between items-start">
                     <div>
@@ -293,6 +499,62 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
           )}
         </div>
       </div>
+
+      {/* Quick View Modal */}
+      <Modal isOpen={!!quickViewProduct} onClose={() => setQuickViewProduct(null)}>
+        {quickViewProduct && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-10">
+            <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden">
+               <img src={quickViewProduct.image} alt={quickViewProduct.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col">
+               <h2 className="text-2xl font-serif font-bold mb-2">{quickViewProduct.name}</h2>
+               <p className="text-xl font-medium mb-4">{formatCurrency(quickViewProduct.price)}</p>
+               <p className="text-gray-600 mb-6 text-sm leading-relaxed">{quickViewProduct.description}</p>
+               
+               <div className="space-y-4 mb-8">
+                 <div>
+                   <span className="block text-sm font-bold mb-2">Color: {qvColor}</span>
+                   <div className="flex gap-2">
+                     {quickViewProduct.colors?.map(c => (
+                       <button 
+                        key={c}
+                        onClick={() => setQvColor(c)}
+                        className={`w-6 h-6 rounded-full border border-gray-200 ${qvColor === c ? 'ring-2 ring-offset-2 ring-black' : ''}`}
+                        style={{ backgroundColor: c === 'White' || c === 'Cream' ? '#EAEAEA' : c.toLowerCase() === 'gold' ? '#B8860B' : c.toLowerCase() === 'navy' ? '#172554' : 'black' }}
+                       />
+                     ))}
+                   </div>
+                 </div>
+                 <div>
+                   <span className="block text-sm font-bold mb-2">Size: {qvSize}</span>
+                   <div className="flex gap-2">
+                      {['S', 'M', 'L', 'XL'].map(s => (
+                        <button 
+                          key={s}
+                          onClick={() => setQvSize(s)}
+                          className={`w-10 h-10 border rounded text-sm ${qvSize === s ? 'bg-black text-white border-black' : 'border-gray-200'}`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                   </div>
+                 </div>
+               </div>
+
+               <div className="mt-auto">
+                 <Button onClick={handleQuickViewAddToCart} className="w-full mb-3">Add to Bag</Button>
+                 <button 
+                  className="w-full text-center text-sm underline hover:text-gray-600"
+                  onClick={() => { setQuickViewProduct(null); onNavigate(Page.PRODUCT, { id: quickViewProduct.id }); }}
+                 >
+                   View Full Details
+                 </button>
+               </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
@@ -301,11 +563,48 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
 export const ProductDetail: React.FC<{ 
   id?: string; 
   onNavigate: (page: Page, params?: any) => void;
-  addToCart?: (product: Product, size: string, color: string) => void; 
-}> = ({ id, onNavigate, addToCart }) => {
+  addToCart?: (product: Product, size: string, color: string) => void;
+  wishlist?: string[];
+  toggleWishlist?: (id: string) => void;
+  reviews?: Review[];
+  onAddReview?: (productId: string, review: Review) => void;
+}> = ({ id, onNavigate, addToCart, wishlist, toggleWishlist, reviews = [], onAddReview }) => {
   const product = PRODUCTS.find(p => p.id === id) || PRODUCTS[0];
   const [selectedSize, setSelectedSize] = useState('M');
   const [selectedColor, setSelectedColor] = useState('Black');
+  const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
+
+  // Review Form State
+  const [rating, setRating] = useState(5);
+  const [reviewerName, setReviewerName] = useState('');
+  const [comment, setComment] = useState('');
+
+  // Handle Recently Viewed
+  useEffect(() => {
+    if (!id) return;
+    try {
+      // Get existing
+      const stored = localStorage.getItem('recentlyViewed');
+      let viewedIds: string[] = stored ? JSON.parse(stored) : [];
+      
+      // Filter current id to move to front
+      viewedIds = viewedIds.filter(vId => vId !== id);
+      viewedIds.unshift(id);
+      
+      // Limit to 6
+      if (viewedIds.length > 6) viewedIds = viewedIds.slice(0, 6);
+      
+      // Save back
+      localStorage.setItem('recentlyViewed', JSON.stringify(viewedIds));
+      
+      // Set state for OTHER items (exclude current product)
+      const others = viewedIds.filter(vId => vId !== id);
+      const otherProducts = others.map(vId => PRODUCTS.find(p => p.id === vId)).filter(Boolean) as Product[];
+      setRecentlyViewed(otherProducts);
+    } catch (e) {
+      console.error("Failed to update recently viewed", e);
+    }
+  }, [id]);
 
   const handleAddToCart = () => {
     if (addToCart) {
@@ -313,6 +612,26 @@ export const ProductDetail: React.FC<{
       onNavigate(Page.CART);
     }
   };
+
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onAddReview && id) {
+      const newReview: Review = {
+        id: Math.random().toString(36).substr(2, 9),
+        reviewerName,
+        rating,
+        comment,
+        date: new Date().toLocaleDateString()
+      };
+      onAddReview(id, newReview);
+      setReviewerName('');
+      setComment('');
+      setRating(5);
+    }
+  };
+
+  const shareUrl = window.location.href;
+  const shareText = `Check out this ${product.name} from Andal Clothing!`;
 
   return (
     <div className="max-w-[1920px] mx-auto px-6 md:px-10 py-12">
@@ -325,12 +644,18 @@ export const ProductDetail: React.FC<{
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
         {/* Gallery */}
         <div className="space-y-4">
-          <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden relative cursor-zoom-in">
+          <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden relative cursor-zoom-in group">
              <img 
                src={product.image} 
                alt={product.name} 
                className="w-full h-full object-cover transition-transform duration-700 hover:scale-125" 
              />
+             <button 
+                className={`absolute top-4 right-4 p-3 rounded-full bg-white/80 backdrop-blur shadow-sm hover:bg-white transition-colors z-20 ${wishlist?.includes(product.id) ? 'text-red-500' : 'text-gray-400'}`}
+                onClick={() => toggleWishlist && toggleWishlist(product.id)}
+              >
+                <span className={`material-symbols-outlined ${wishlist?.includes(product.id) ? 'fill-current' : ''}`}>favorite</span>
+              </button>
           </div>
           <div className="grid grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
@@ -347,9 +672,7 @@ export const ProductDetail: React.FC<{
           <p className="text-2xl font-medium mb-8">{formatCurrency(product.price)}</p>
 
           <p className="text-gray-600 leading-relaxed mb-8">
-            An embodiment of traditional elegance, this {product.category.toLowerCase().slice(0, -1)} is crafted from the finest materials. 
-            Designed for the modern man who values heritage, comfort, and sophistication. 
-            Perfect for special occasions, ceremonies, or Friday prayers.
+            {product.description || "An embodiment of traditional elegance, this attire is crafted from the finest materials. Designed for the modern man who values heritage, comfort, and sophistication. Perfect for special occasions, ceremonies, or Friday prayers."}
           </p>
 
           <div className="space-y-6 mb-10">
@@ -392,6 +715,14 @@ export const ProductDetail: React.FC<{
 
           <Button onClick={handleAddToCart} className="w-full mb-8 text-lg">Add to Bag</Button>
 
+          {/* Social Share */}
+          <div className="flex items-center gap-4 mb-8">
+            <span className="text-sm font-bold">Share:</span>
+            <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`)} className="text-gray-500 hover:text-green-600 transition-colors">WhatsApp</button>
+            <button onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`)} className="text-gray-500 hover:text-blue-400 transition-colors">Twitter</button>
+            <button onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`)} className="text-gray-500 hover:text-blue-700 transition-colors">Facebook</button>
+          </div>
+
           <div className="border-t border-gray-200">
             <details className="group py-4 border-b border-gray-200 cursor-pointer">
               <summary className="flex justify-between items-center font-medium list-none">
@@ -417,6 +748,91 @@ export const ProductDetail: React.FC<{
           </div>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      <div className="mt-20 max-w-4xl">
+        <h2 className="text-3xl font-serif font-bold mb-8">Customer Reviews</h2>
+        
+        {/* Review Form */}
+        <div className="bg-gray-50 p-6 rounded-xl mb-12">
+          <h3 className="text-lg font-bold mb-4">Write a Review</h3>
+          <form onSubmit={handleSubmitReview} className="space-y-4">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <Input value={reviewerName} onChange={e => setReviewerName(e.target.value)} required placeholder="Your Name" />
+              </div>
+              <div className="w-32">
+                 <label className="block text-sm font-medium mb-1">Rating</label>
+                 <select 
+                  className="w-full h-12 px-4 bg-white border border-gray-200 rounded focus:outline-none focus:border-primary"
+                  value={rating}
+                  onChange={e => setRating(Number(e.target.value))}
+                 >
+                   <option value="5">5 Stars</option>
+                   <option value="4">4 Stars</option>
+                   <option value="3">3 Stars</option>
+                   <option value="2">2 Stars</option>
+                   <option value="1">1 Star</option>
+                 </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Comment</label>
+              <textarea 
+                className="w-full h-24 px-4 py-3 bg-white border border-gray-200 rounded focus:outline-none focus:border-primary resize-none"
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+                required
+                placeholder="Share your thoughts about this product..."
+              ></textarea>
+            </div>
+            <Button type="submit">Submit Review</Button>
+          </form>
+        </div>
+
+        {/* Reviews List */}
+        <div className="space-y-6">
+          {reviews.length > 0 ? (
+            reviews.map((review, i) => (
+              <div key={i} className="border-b border-gray-100 pb-6 last:border-0">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <span className="font-bold">{review.reviewerName}</span>
+                    <div className="flex text-yellow-500 text-sm my-1">
+                      {[...Array(5)].map((_, starIndex) => (
+                        <span key={starIndex} className="material-symbols-outlined text-sm filled" style={{ fontVariationSettings: `'FILL' ${starIndex < review.rating ? 1 : 0}` }}>star</span>
+                      ))}
+                    </div>
+                  </div>
+                  <span className="text-gray-400 text-sm">{review.date}</span>
+                </div>
+                <p className="text-gray-600">{review.comment}</p>
+              </div>
+            ))
+          ) : (
+             <p className="text-gray-500 italic">No reviews yet. Be the first to review this product!</p>
+          )}
+        </div>
+      </div>
+
+      {/* Recently Viewed */}
+      {recentlyViewed.length > 0 && (
+        <div className="mt-24 border-t border-gray-200 pt-16">
+           <h2 className="text-3xl font-serif font-bold text-center mb-12">Recently Viewed</h2>
+           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+             {recentlyViewed.map(p => (
+               <div key={p.id} className="group cursor-pointer" onClick={() => onNavigate(Page.PRODUCT, { id: p.id })}>
+                 <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden mb-3">
+                    <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                 </div>
+                 <h3 className="font-medium text-xs md:text-sm truncate">{p.name}</h3>
+                 <p className="text-gray-500 text-xs">{formatCurrency(p.price)}</p>
+               </div>
+             ))}
+           </div>
+        </div>
+      )}
 
       {/* Recommendations */}
       <div className="mt-24">

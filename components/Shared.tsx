@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Page } from '../types';
 
 interface LayoutProps {
@@ -197,14 +197,70 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ c
   />
 );
 
+export const Modal: React.FC<{ isOpen: boolean; onClose: () => void; children: React.ReactNode }> = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="relative bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-fade-in">
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 bg-white rounded-full hover:bg-gray-100 z-10"
+        >
+          <span className="material-symbols-outlined">close</span>
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+};
+
+export const BackToTop: React.FC = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.scrollY > 500) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', toggleVisibility);
+    return () => window.removeEventListener('scroll', toggleVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <button
+      onClick={scrollToTop}
+      className="fixed bottom-8 right-8 z-40 bg-primary text-white p-3 rounded-full shadow-lg hover:bg-black transition-all animate-fade-in"
+      aria-label="Back to Top"
+    >
+      <span className="material-symbols-outlined">arrow_upward</span>
+    </button>
+  );
+};
+
 export const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate, isAuthenticated, cartCount = 0 }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white relative">
       <Header onNavigate={onNavigate} cartCount={cartCount} isAuthenticated={isAuthenticated} />
       <main className="flex-grow animate-fade-in">
         {children}
       </main>
       <Footer onNavigate={onNavigate} />
+      <BackToTop />
     </div>
   );
 };

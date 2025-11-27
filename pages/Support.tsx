@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Page } from '../types';
-import { Button, Input } from '../components/Shared';
+import { Button, Input, Modal } from '../components/Shared';
+import { PRODUCTS } from './ShopPages';
 
 // --- MOCK DATA & INTERFACES ---
 interface Address {
@@ -83,12 +84,24 @@ const INITIAL_ADDRESSES: Address[] = [
   }
 ];
 
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
+  };
+
 // --- ACCOUNT PAGE ---
-export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void; params?: any; onLogout?: () => void }> = ({ onNavigate, params, onLogout }) => {
+export const Account: React.FC<{ 
+  onNavigate: (page: Page, params?: any) => void; 
+  params?: any; 
+  onLogout?: () => void;
+  wishlist?: string[];
+  toggleWishlist?: (id: string) => void;
+}> = ({ onNavigate, params, onLogout, wishlist = [], toggleWishlist }) => {
   const currentView = params?.view || 'profile';
 
   // --- ORDER STATE ---
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showTracking, setShowTracking] = useState(false);
+  const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
 
   // --- ADDRESS STATE ---
   const [addresses, setAddresses] = useState<Address[]>(INITIAL_ADDRESSES);
@@ -179,6 +192,11 @@ export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void;
     }
   };
 
+  const handleTrackPackage = (order: Order) => {
+    setTrackingOrder(order);
+    setShowTracking(true);
+  };
+
   return (
     <div className="flex min-h-[80vh] bg-gray-50">
       <aside className="w-64 bg-white border-r border-gray-200 hidden md:block">
@@ -205,6 +223,12 @@ export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void;
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm text-left ${currentView === 'orders' ? 'bg-gray-100 text-black' : 'text-gray-600 hover:bg-gray-50'}`}
           >
             <span className="material-symbols-outlined text-xl">shopping_bag</span> My Orders
+          </button>
+          <button 
+            onClick={() => { onNavigate(Page.ACCOUNT, { view: 'wishlist' }); setSelectedOrder(null); setIsAddressFormOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm text-left ${currentView === 'wishlist' ? 'bg-gray-100 text-black' : 'text-gray-600 hover:bg-gray-50'}`}
+          >
+            <span className="material-symbols-outlined text-xl">favorite</span> Wishlist
           </button>
           <button 
             onClick={() => { onNavigate(Page.ACCOUNT, { view: 'addresses' }); setSelectedOrder(null); setIsAddressFormOpen(false); }}
@@ -284,9 +308,16 @@ export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void;
                           <p className="text-sm text-gray-600 truncate max-w-md">
                             {order.items.map(item => item.name).join(', ')}
                           </p>
-                          <button onClick={() => setSelectedOrder(order)} className="text-sm font-medium underline hover:text-blue-600">
-                            View Details
-                          </button>
+                          <div className="flex gap-4">
+                            {order.status === 'In Transit' && (
+                                <button onClick={(e) => { e.stopPropagation(); handleTrackPackage(order); }} className="text-sm font-bold text-blue-600 hover:underline">
+                                  Track Package
+                                </button>
+                            )}
+                            <button onClick={() => setSelectedOrder(order)} className="text-sm font-medium underline hover:text-blue-600">
+                              View Details
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -302,8 +333,15 @@ export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void;
                       <h1 className="text-3xl font-bold mb-2">Order {selectedOrder.id}</h1>
                       <p className="text-gray-600">Placed on {selectedOrder.date}</p>
                     </div>
-                    <div className={`mt-2 md:mt-0 px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider ${selectedOrder.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                      {selectedOrder.status}
+                    <div className="flex items-center gap-4">
+                        {selectedOrder.status === 'In Transit' && (
+                           <Button variant="outline" onClick={() => handleTrackPackage(selectedOrder)} className="h-10 text-sm">
+                             Track Package
+                           </Button>
+                        )}
+                        <div className={`px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider ${selectedOrder.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {selectedOrder.status}
+                        </div>
                     </div>
                   </div>
 
@@ -346,6 +384,45 @@ export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void;
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Wishlist View */}
+          {currentView === 'wishlist' && (
+            <>
+              <h1 className="text-3xl font-bold mb-8">My Wishlist</h1>
+              {wishlist.length > 0 ? (
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {PRODUCTS.filter(p => wishlist.includes(p.id)).map(product => (
+                       <div key={product.id} className="bg-white p-4 rounded-xl border border-gray-200 group relative">
+                         <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden mb-4 cursor-pointer" onClick={() => onNavigate(Page.PRODUCT, { id: product.id })}>
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                         </div>
+                         <div className="flex justify-between items-start mb-4">
+                           <div>
+                             <h3 className="font-medium">{product.name}</h3>
+                             <p className="text-gray-500 text-sm">{formatCurrency(product.price)}</p>
+                           </div>
+                         </div>
+                         <div className="flex gap-2">
+                           <Button className="flex-1 text-sm h-10 px-0" onClick={() => onNavigate(Page.PRODUCT, { id: product.id })}>View Details</Button>
+                           <button 
+                             onClick={() => toggleWishlist && toggleWishlist(product.id)}
+                             className="w-10 h-10 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-500 transition-colors"
+                           >
+                              <span className="material-symbols-outlined text-xl">delete</span>
+                           </button>
+                         </div>
+                       </div>
+                    ))}
+                 </div>
+              ) : (
+                <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                  <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">favorite</span>
+                  <p className="text-gray-500 mb-6">Your wishlist is empty.</p>
+                  <Button onClick={() => onNavigate(Page.SHOP)}>Explore Collection</Button>
                 </div>
               )}
             </>
@@ -479,6 +556,46 @@ export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void;
            )}
         </div>
       </div>
+
+      {/* Tracking Modal */}
+      <Modal isOpen={showTracking} onClose={() => setShowTracking(false)}>
+        {trackingOrder && (
+          <div className="p-8">
+            <h2 className="text-2xl font-bold mb-2">Tracking Details</h2>
+            <p className="text-gray-500 mb-8">Order {trackingOrder.id}</p>
+            
+            <div className="relative border-l-2 border-gray-200 ml-3 space-y-8">
+               <div className="relative pl-8">
+                 <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow"></div>
+                 <p className="font-bold text-sm">Out for Delivery</p>
+                 <p className="text-xs text-gray-500">Today, 09:30 AM</p>
+                 <p className="text-sm text-gray-600 mt-1">Your package is with the delivery agent.</p>
+               </div>
+               <div className="relative pl-8">
+                 <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-300 border-2 border-white shadow"></div>
+                 <p className="font-bold text-sm">Arrived at Sorting Facility</p>
+                 <p className="text-xs text-gray-500">Yesterday, 06:45 PM</p>
+                 <p className="text-sm text-gray-600 mt-1">Lagos Main Distribution Center</p>
+               </div>
+               <div className="relative pl-8">
+                 <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-300 border-2 border-white shadow"></div>
+                 <p className="font-bold text-sm">Shipped</p>
+                 <p className="text-xs text-gray-500">Sep 29, 10:00 AM</p>
+                 <p className="text-sm text-gray-600 mt-1">Package has left our warehouse.</p>
+               </div>
+               <div className="relative pl-8">
+                 <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-300 border-2 border-white shadow"></div>
+                 <p className="font-bold text-sm">Order Placed</p>
+                 <p className="text-xs text-gray-500">Sep 28, 02:20 PM</p>
+               </div>
+            </div>
+
+            <div className="mt-8 text-right">
+              <Button onClick={() => setShowTracking(false)}>Close</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

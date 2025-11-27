@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Page, CartItem, Product } from './types';
+import { Page, CartItem, Product, Review } from './types';
 import { Layout } from './components/Shared';
-import { Home, Shop, ProductDetail, Cart, CheckoutSuccess } from './pages/ShopPages';
+import { Home, Shop, ProductDetail, Cart, CheckoutSuccess, PRODUCTS } from './pages/ShopPages';
 import { About, Journal, Sustainability, Careers, HelpCenter } from './pages/Content';
 import { Account, Contact, Press } from './pages/Support';
 import { SignIn, SignUp, ForgotPassword, NewPassword } from './pages/Auth';
@@ -11,6 +11,11 @@ const App: React.FC = () => {
   const [params, setParams] = useState<any>({});
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  
+  // State to hold reviews map: ProductID -> Review[]
+  // Initialized with empty array for now, logic adds to it.
+  const [productReviews, setProductReviews] = useState<Record<string, Review[]>>({});
 
   const navigate = (newPage: Page, newParams?: any) => {
     window.scrollTo(0, 0);
@@ -81,6 +86,27 @@ const App: React.FC = () => {
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
+  // Wishlist Functions
+  const toggleWishlist = (productId: string) => {
+    if (!isAuthenticated) {
+      navigate(Page.LOGIN);
+      return;
+    }
+    setWishlist(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId) 
+        : [...prev, productId]
+    );
+  };
+
+  // Review Functions
+  const addReview = (productId: string, review: Review) => {
+    setProductReviews(prev => ({
+      ...prev,
+      [productId]: [...(prev[productId] || []), review]
+    }));
+  };
+
   // Simple hash router simulation for refresh persistence
   useEffect(() => {
     const handleHashChange = () => {
@@ -119,8 +145,26 @@ const App: React.FC = () => {
   return (
     <Layout activePage={page} onNavigate={navigate} isAuthenticated={isAuthenticated} cartCount={cartCount}>
       {page === Page.HOME && <Home onNavigate={navigate} />}
-      {page === Page.SHOP && <Shop onNavigate={navigate} params={params} />}
-      {page === Page.PRODUCT && <ProductDetail id={params.id} onNavigate={navigate} addToCart={addToCart} />}
+      {page === Page.SHOP && (
+        <Shop 
+          onNavigate={navigate} 
+          params={params} 
+          wishlist={wishlist}
+          toggleWishlist={toggleWishlist}
+          addToCart={addToCart}
+        />
+      )}
+      {page === Page.PRODUCT && (
+        <ProductDetail 
+          id={params.id} 
+          onNavigate={navigate} 
+          addToCart={addToCart} 
+          wishlist={wishlist}
+          toggleWishlist={toggleWishlist}
+          reviews={productReviews[params.id] || []}
+          onAddReview={addReview}
+        />
+      )}
       {page === Page.CART && (
         <Cart 
           onNavigate={navigate} 
@@ -131,7 +175,15 @@ const App: React.FC = () => {
         />
       )}
       {page === Page.CHECKOUT_SUCCESS && <CheckoutSuccess onNavigate={navigate} />}
-      {page === Page.ACCOUNT && <Account onNavigate={navigate} params={params} onLogout={handleLogout} />}
+      {page === Page.ACCOUNT && (
+        <Account 
+          onNavigate={navigate} 
+          params={params} 
+          onLogout={handleLogout} 
+          wishlist={wishlist}
+          toggleWishlist={toggleWishlist}
+        />
+      )}
       {page === Page.ABOUT && <About />}
       {page === Page.CONTACT && <Contact />}
       {page === Page.JOURNAL && <Journal />}

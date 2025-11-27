@@ -624,7 +624,7 @@ export const ProductDetail: React.FC<{
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
-      const newImageUrls = files.map(file => URL.createObjectURL(file));
+      const newImageUrls = files.map(file => URL.createObjectURL(file as Blob));
       const updatedGallery = [...galleryImages, ...newImageUrls];
       setGalleryImages(updatedGallery);
       if (!activeImage) setActiveImage(newImageUrls[0]);

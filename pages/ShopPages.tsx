@@ -1,19 +1,22 @@
-
 import React, { useState } from 'react';
 import { Product, Page, CartItem } from '../types';
 import { Button } from '../components/Shared';
 
 // --- MOCK DATA ---
 const PRODUCTS: Product[] = [
-  { id: '1', name: 'Royal Grand Agbada', price: 1500, category: 'Agbadas', image: 'https://placehold.co/800x1000/1a1a1a/FFF?text=Royal+Agbada', isNew: true, collection: 'Eid' },
-  { id: '2', name: 'Premium White Jalabiya', price: 250, category: 'Jalabiyas', image: 'https://placehold.co/800x1000/EAEAEA/1A1A1A?text=White+Jalabiya' },
-  { id: '3', name: 'Hand-Embroidered Zanna Cap', price: 120, category: 'Caps', image: 'https://placehold.co/800x1000/333/FFF?text=Zanna+Cap' },
-  { id: '4', name: 'Swiss Voile Fabric - Navy', price: 300, category: 'Fabrics', image: 'https://placehold.co/800x1000/172554/FFF?text=Swiss+Voile', collection: 'Textiles' },
-  { id: '5', name: 'Emirate Black Kaftan', price: 450, category: 'Kaftan', image: 'https://placehold.co/800x1000/000/FFF?text=Black+Kaftan' },
-  { id: '6', name: 'Classic Hausa Fila', price: 80, category: 'Caps', image: 'https://placehold.co/800x1000/666/FFF?text=Hausa+Fila' },
-  { id: '7', name: 'Atiku Jacquard Fabric', price: 280, category: 'Fabrics', image: 'https://placehold.co/800x1000/e5e5e5/333?text=Atiku+Fabric' },
-  { id: '8', name: 'Ceremonial Gold Agbada', price: 2100, category: 'Agbadas', image: 'https://placehold.co/800x1000/B8860B/FFF?text=Gold+Agbada', isNew: true },
+  { id: '1', name: 'Royal Grand Agbada', price: 150000, category: 'Agbadas', image: 'https://placehold.co/800x1000/1a1a1a/FFF?text=Royal+Agbada', isNew: true, collection: 'Eid' },
+  { id: '2', name: 'Premium White Jalabiya', price: 25000, category: 'Jalabiyas', image: 'https://placehold.co/800x1000/EAEAEA/1A1A1A?text=White+Jalabiya' },
+  { id: '3', name: 'Hand-Embroidered Zanna Cap', price: 12000, category: 'Caps', image: 'https://placehold.co/800x1000/333/FFF?text=Zanna+Cap' },
+  { id: '4', name: 'Swiss Voile Fabric - Navy', price: 30000, category: 'Fabrics', image: 'https://placehold.co/800x1000/172554/FFF?text=Swiss+Voile', collection: 'Textiles' },
+  { id: '5', name: 'Emirate Black Kaftan', price: 45000, category: 'Kaftan', image: 'https://placehold.co/800x1000/000/FFF?text=Black+Kaftan' },
+  { id: '6', name: 'Classic Hausa Fila', price: 8000, category: 'Caps', image: 'https://placehold.co/800x1000/666/FFF?text=Hausa+Fila' },
+  { id: '7', name: 'Atiku Jacquard Fabric', price: 28000, category: 'Fabrics', image: 'https://placehold.co/800x1000/e5e5e5/333?text=Atiku+Fabric' },
+  { id: '8', name: 'Ceremonial Gold Agbada', price: 210000, category: 'Agbadas', image: 'https://placehold.co/800x1000/B8860B/FFF?text=Gold+Agbada', isNew: true },
 ];
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
+};
 
 // --- HOME PAGE ---
 export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> = ({ onNavigate }) => {
@@ -44,7 +47,7 @@ export const Home: React.FC<{ onNavigate: (page: Page, params?: any) => void }> 
                   <h3 className="font-medium text-lg">{product.name}</h3>
                   <p className="text-gray-500 text-sm mt-1">{product.category}</p>
                 </div>
-                <span className="font-medium">${product.price}</span>
+                <span className="font-medium">{formatCurrency(product.price)}</span>
               </div>
             </div>
           ))}
@@ -216,7 +219,7 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
                       <h3 className="font-medium text-base group-hover:text-gray-600 transition-colors">{product.name}</h3>
                       {product.collection && <p className="text-gray-500 text-xs mt-1">{product.collection} Collection</p>}
                     </div>
-                    <span className="font-medium text-sm">${product.price}</span>
+                    <span className="font-medium text-sm">{formatCurrency(product.price)}</span>
                   </div>
                 </div>
               ))}
@@ -245,8 +248,21 @@ export const Shop: React.FC<{ onNavigate: (page: Page, params?: any) => void; pa
 };
 
 // --- PRODUCT DETAIL PAGE ---
-export const ProductDetail: React.FC<{ id?: string; onNavigate: (page: Page, params?: any) => void }> = ({ id, onNavigate }) => {
+export const ProductDetail: React.FC<{ 
+  id?: string; 
+  onNavigate: (page: Page, params?: any) => void;
+  addToCart?: (product: Product, size: string, color: string) => void; 
+}> = ({ id, onNavigate, addToCart }) => {
   const product = PRODUCTS.find(p => p.id === id) || PRODUCTS[0];
+  const [selectedSize, setSelectedSize] = useState('M');
+  const [selectedColor, setSelectedColor] = useState('Black');
+
+  const handleAddToCart = () => {
+    if (addToCart) {
+      addToCart(product, selectedSize, selectedColor);
+      onNavigate(Page.CART);
+    }
+  };
 
   return (
     <div className="max-w-[1920px] mx-auto px-6 md:px-10 py-12">
@@ -274,7 +290,7 @@ export const ProductDetail: React.FC<{ id?: string; onNavigate: (page: Page, par
         {/* Details */}
         <div className="flex flex-col h-full">
           <h1 className="text-4xl md:text-5xl font-serif font-medium mb-4">{product.name}</h1>
-          <p className="text-2xl font-medium mb-8">${product.price}.00</p>
+          <p className="text-2xl font-medium mb-8">{formatCurrency(product.price)}</p>
 
           <p className="text-gray-600 leading-relaxed mb-8">
             An embodiment of traditional elegance, this {product.category.toLowerCase().slice(0, -1)} is crafted from the finest materials. 
@@ -284,22 +300,35 @@ export const ProductDetail: React.FC<{ id?: string; onNavigate: (page: Page, par
 
           <div className="space-y-6 mb-10">
             <div>
-              <span className="block text-sm font-bold mb-3">Color</span>
+              <span className="block text-sm font-bold mb-3">Color: {selectedColor}</span>
               <div className="flex gap-3">
-                <button className="w-8 h-8 rounded-full bg-black ring-2 ring-offset-2 ring-black"></button>
-                <button className="w-8 h-8 rounded-full bg-[#EAEAEA] border border-gray-200 hover:ring-2 ring-offset-2 ring-gray-300 transition-all"></button>
-                <button className="w-8 h-8 rounded-full bg-blue-900 border border-gray-200 hover:ring-2 ring-offset-2 ring-gray-300 transition-all"></button>
+                <button 
+                  onClick={() => setSelectedColor('Black')}
+                  className={`w-8 h-8 rounded-full bg-black ${selectedColor === 'Black' ? 'ring-2 ring-offset-2 ring-black' : ''}`}
+                ></button>
+                <button 
+                  onClick={() => setSelectedColor('White')}
+                  className={`w-8 h-8 rounded-full bg-[#EAEAEA] border border-gray-200 ${selectedColor === 'White' ? 'ring-2 ring-offset-2 ring-gray-300' : ''}`}
+                ></button>
+                <button 
+                  onClick={() => setSelectedColor('Navy')}
+                  className={`w-8 h-8 rounded-full bg-blue-900 border border-gray-200 ${selectedColor === 'Navy' ? 'ring-2 ring-offset-2 ring-gray-300' : ''}`}
+                ></button>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between mb-3">
-                <span className="text-sm font-bold">Size</span>
+                <span className="text-sm font-bold">Size: {selectedSize}</span>
                 <button className="text-sm text-gray-500 underline">Size Guide</button>
               </div>
               <div className="grid grid-cols-5 gap-3">
                 {['S', 'M', 'L', 'XL', 'XXL'].map(size => (
-                  <button key={size} className={`h-12 border rounded flex items-center justify-center text-sm font-medium transition-all ${size === 'M' ? 'bg-black text-white border-black' : 'border-gray-200 hover:border-black'}`}>
+                  <button 
+                    key={size} 
+                    onClick={() => setSelectedSize(size)}
+                    className={`h-12 border rounded flex items-center justify-center text-sm font-medium transition-all ${selectedSize === size ? 'bg-black text-white border-black' : 'border-gray-200 hover:border-black'}`}
+                  >
                     {size}
                   </button>
                 ))}
@@ -307,7 +336,7 @@ export const ProductDetail: React.FC<{ id?: string; onNavigate: (page: Page, par
             </div>
           </div>
 
-          <Button onClick={() => onNavigate(Page.CART)} className="w-full mb-8 text-lg">Add to Bag</Button>
+          <Button onClick={handleAddToCart} className="w-full mb-8 text-lg">Add to Bag</Button>
 
           <div className="border-t border-gray-200">
             <details className="group py-4 border-b border-gray-200 cursor-pointer">
@@ -345,7 +374,7 @@ export const ProductDetail: React.FC<{ id?: string; onNavigate: (page: Page, par
                  <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                </div>
                <h3 className="font-medium text-sm">{p.name}</h3>
-               <p className="text-gray-500 text-sm">${p.price}</p>
+               <p className="text-gray-500 text-sm">{formatCurrency(p.price)}</p>
              </div>
            ))}
         </div>
@@ -355,16 +384,44 @@ export const ProductDetail: React.FC<{ id?: string; onNavigate: (page: Page, par
 };
 
 // --- CART PAGE ---
-export const Cart: React.FC<{ onNavigate: (page: Page, params?: any) => void; isAuthenticated?: boolean }> = ({ onNavigate, isAuthenticated }) => {
+interface CartProps {
+  onNavigate: (page: Page, params?: any) => void;
+  isAuthenticated?: boolean;
+  cartItems?: CartItem[];
+  updateQuantity?: (id: string, size: string, color: string, delta: number) => void;
+  removeFromCart?: (id: string, size: string, color: string) => void;
+}
+
+export const Cart: React.FC<CartProps> = ({ 
+  onNavigate, 
+  isAuthenticated, 
+  cartItems = [], 
+  updateQuantity, 
+  removeFromCart 
+}) => {
   
   const handleCheckout = () => {
     if (isAuthenticated) {
       onNavigate(Page.CHECKOUT_SUCCESS);
     } else {
-      // In a real app, you'd save the return URL
       onNavigate(Page.LOGIN);
     }
   };
+
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const shipping = cartItems.length > 0 ? 5000 : 0;
+  const total = subtotal + shipping;
+
+  if (cartItems.length === 0) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">
+        <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">shopping_bag</span>
+        <h1 className="text-2xl font-serif font-bold mb-2">Your Bag is Empty</h1>
+        <p className="text-gray-500 mb-8">Looks like you haven't added any items yet.</p>
+        <Button onClick={() => onNavigate(Page.SHOP)}>Start Shopping</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-10 py-16">
@@ -373,49 +430,45 @@ export const Cart: React.FC<{ onNavigate: (page: Page, params?: any) => void; is
       <div className="flex flex-col lg:flex-row gap-16">
         {/* Cart Items */}
         <div className="flex-1 space-y-8">
-          <div className="flex gap-6 py-6 border-b border-gray-100">
-            <div className="w-24 h-32 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-              <img src={PRODUCTS[1].image} alt="Jalabiya" className="w-full h-full object-cover" />
-            </div>
-            <div className="flex-1 flex justify-between">
-              <div>
-                <h3 className="font-medium text-lg">{PRODUCTS[1].name}</h3>
-                <p className="text-gray-500 text-sm mt-1">Size: L</p>
-                <p className="text-gray-500 text-sm">Color: White</p>
-                <div className="flex items-center gap-4 mt-4">
-                  <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50">-</button>
-                  <span className="text-sm font-medium">1</span>
-                  <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50">+</button>
+          {cartItems.map((item, index) => (
+            <div key={`${item.id}-${item.selectedSize}-${item.selectedColor}-${index}`} className="flex gap-6 py-6 border-b border-gray-100">
+              <div className="w-24 h-32 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 cursor-pointer" onClick={() => onNavigate(Page.PRODUCT, { id: item.id })}>
+                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 flex justify-between">
+                <div>
+                  <h3 className="font-medium text-lg cursor-pointer hover:underline" onClick={() => onNavigate(Page.PRODUCT, { id: item.id })}>{item.name}</h3>
+                  <p className="text-gray-500 text-sm mt-1">Size: {item.selectedSize}</p>
+                  <p className="text-gray-500 text-sm">Color: {item.selectedColor}</p>
+                  <div className="flex items-center gap-4 mt-4">
+                    <button 
+                      onClick={() => updateQuantity && updateQuantity(item.id, item.selectedSize, item.selectedColor, -1)}
+                      className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
+                      disabled={item.quantity <= 1}
+                    >
+                      <span className="material-symbols-outlined text-sm">remove</span>
+                    </button>
+                    <span className="text-sm font-medium w-4 text-center">{item.quantity}</span>
+                    <button 
+                      onClick={() => updateQuantity && updateQuantity(item.id, item.selectedSize, item.selectedColor, 1)}
+                      className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50"
+                    >
+                      <span className="material-symbols-outlined text-sm">add</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="flex flex-col justify-between items-end">
+                  <span className="font-medium">{formatCurrency(item.price * item.quantity)}</span>
+                  <button 
+                    onClick={() => removeFromCart && removeFromCart(item.id, item.selectedSize, item.selectedColor)}
+                    className="text-gray-400 hover:text-red-500 flex items-center gap-1 text-sm"
+                  >
+                    <span className="material-symbols-outlined text-lg">close</span> Remove
+                  </button>
                 </div>
               </div>
-              <div className="flex flex-col justify-between items-end">
-                <span className="font-medium">${PRODUCTS[1].price}.00</span>
-                <button className="text-gray-400 hover:text-red-500"><span className="material-symbols-outlined">close</span></button>
-              </div>
             </div>
-          </div>
-
-          <div className="flex gap-6 py-6 border-b border-gray-100">
-            <div className="w-24 h-32 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-              <img src={PRODUCTS[2].image} alt="Cap" className="w-full h-full object-cover" />
-            </div>
-            <div className="flex-1 flex justify-between">
-              <div>
-                <h3 className="font-medium text-lg">{PRODUCTS[2].name}</h3>
-                <p className="text-gray-500 text-sm mt-1">Size: 22.5</p>
-                <p className="text-gray-500 text-sm">Color: Charcoal</p>
-                <div className="flex items-center gap-4 mt-4">
-                  <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50">-</button>
-                  <span className="text-sm font-medium">1</span>
-                  <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50">+</button>
-                </div>
-              </div>
-              <div className="flex flex-col justify-between items-end">
-                <span className="font-medium">${PRODUCTS[2].price}.00</span>
-                <button className="text-gray-400 hover:text-red-500"><span className="material-symbols-outlined">close</span></button>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Order Summary */}
@@ -424,15 +477,15 @@ export const Cart: React.FC<{ onNavigate: (page: Page, params?: any) => void; is
           <div className="space-y-4 mb-6 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">${PRODUCTS[1].price + PRODUCTS[2].price}.00</span>
+              <span className="font-medium">{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Shipping</span>
-              <span className="font-medium">$25.00</span>
+              <span className="font-medium">{formatCurrency(shipping)}</span>
             </div>
             <div className="border-t border-gray-200 pt-4 flex justify-between text-base">
               <span className="font-bold">Total</span>
-              <span className="font-bold">${PRODUCTS[1].price + PRODUCTS[2].price + 25}.00</span>
+              <span className="font-bold">{formatCurrency(total)}</span>
             </div>
           </div>
           
@@ -475,20 +528,20 @@ export const CheckoutSuccess: React.FC<{ onNavigate: (page: Page, params?: any) 
                 <p className="font-medium">{PRODUCTS[0].name}</p>
                 <p className="text-sm text-gray-400">Size: L, Color: Gold</p>
              </div>
-             <span>${PRODUCTS[0].price}.00</span>
+             <span>{formatCurrency(PRODUCTS[0].price)}</span>
            </div>
            <div className="flex gap-4">
-             <img src={PRODUCTS[5].image} className="w-16 h-16 object-cover rounded" />
+             <img src={PRODUCTS[4].image} className="w-16 h-16 object-cover rounded" />
              <div className="flex-1">
-                <p className="font-medium">{PRODUCTS[5].name}</p>
+                <p className="font-medium">{PRODUCTS[4].name}</p>
                 <p className="text-sm text-gray-400">Color: Classic Grey</p>
              </div>
-             <span>${PRODUCTS[5].price}.00</span>
+             <span>{formatCurrency(PRODUCTS[4].price)}</span>
            </div>
         </div>
         <div className="border-t border-white/10 mt-6 pt-4 flex justify-between font-bold text-lg">
           <span>Total</span>
-          <span>${PRODUCTS[0].price + PRODUCTS[5].price}.00</span>
+          <span>{formatCurrency(PRODUCTS[0].price + PRODUCTS[4].price)}</span>
         </div>
       </div>
 

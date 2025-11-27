@@ -6,6 +6,7 @@ interface LayoutProps {
   activePage: Page;
   onNavigate: (page: Page, params?: any) => void;
   isAuthenticated?: boolean;
+  cartCount?: number;
 }
 
 export const Header: React.FC<{ onNavigate: (page: Page, params?: any) => void; cartCount: number; isAuthenticated?: boolean }> = ({ onNavigate, cartCount, isAuthenticated }) => {
@@ -196,10 +197,7 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ c
   />
 );
 
-export const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate, isAuthenticated }) => {
-  // Mock cart count
-  const cartCount = 2; 
-
+export const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate, isAuthenticated, cartCount = 0 }) => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header onNavigate={onNavigate} cartCount={cartCount} isAuthenticated={isAuthenticated} />

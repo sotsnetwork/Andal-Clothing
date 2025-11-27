@@ -92,9 +92,9 @@ export const Account: React.FC<{ onNavigate: (page: Page, params?: any) => void;
               <h1 className="text-3xl font-bold mb-8">My Orders</h1>
               <div className="space-y-6">
                 {[
-                  { id: '#4523-23', date: 'Oct 12, 2024', status: 'Delivered', total: '$1,750.00', items: 'Royal Grand Agbada, White Jalabiya' },
-                  { id: '#4490-11', date: 'Sep 28, 2024', status: 'In Transit', total: '$450.00', items: 'Emirate Black Kaftan' },
-                  { id: '#4102-09', date: 'Aug 15, 2024', status: 'Delivered', total: '$120.00', items: 'Zanna Cap' },
+                  { id: '#4523-23', date: 'Oct 12, 2024', status: 'Delivered', total: '₦175,000.00', items: 'Royal Grand Agbada, White Jalabiya' },
+                  { id: '#4490-11', date: 'Sep 28, 2024', status: 'In Transit', total: '₦45,000.00', items: 'Emirate Black Kaftan' },
+                  { id: '#4102-09', date: 'Aug 15, 2024', status: 'Delivered', total: '₦12,000.00', items: 'Zanna Cap' },
                 ].map((order, i) => (
                   <div key={i} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-sm transition-shadow">
                     <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">

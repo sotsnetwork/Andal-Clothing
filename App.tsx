@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Page } from './types';
+import { Page, CartItem, Product } from './types';
 import { Layout } from './components/Shared';
 import { Home, Shop, ProductDetail, Cart, CheckoutSuccess } from './pages/ShopPages';
 import { About, Journal, Sustainability, Careers, HelpCenter } from './pages/Content';
@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [page, setPage] = useState<Page>(Page.HOME);
   const [params, setParams] = useState<any>({});
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   const navigate = (newPage: Page, newParams?: any) => {
     window.scrollTo(0, 0);
@@ -37,6 +38,48 @@ const App: React.FC = () => {
     setIsAuthenticated(false);
     navigate(Page.HOME);
   };
+
+  // Cart Functions
+  const addToCart = (product: Product, size: string, color: string) => {
+    setCart(prev => {
+      // Check if item with same ID, size, and color exists
+      const existingItem = prev.find(item => 
+        item.id === product.id && 
+        item.selectedSize === size && 
+        item.selectedColor === color
+      );
+
+      if (existingItem) {
+        return prev.map(item => 
+          (item.id === product.id && item.selectedSize === size && item.selectedColor === color)
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+
+      return [...prev, { ...product, quantity: 1, selectedSize: size, selectedColor: color }];
+    });
+    // Optional: Navigate to cart or show toast
+    // navigate(Page.CART); 
+  };
+
+  const updateQuantity = (itemId: string, size: string, color: string, delta: number) => {
+    setCart(prev => prev.map(item => {
+      if (item.id === itemId && item.selectedSize === size && item.selectedColor === color) {
+        const newQuantity = item.quantity + delta;
+        return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
+      }
+      return item;
+    }));
+  };
+
+  const removeFromCart = (itemId: string, size: string, color: string) => {
+    setCart(prev => prev.filter(item => 
+      !(item.id === itemId && item.selectedSize === size && item.selectedColor === color)
+    ));
+  };
+
+  const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   // Simple hash router simulation for refresh persistence
   useEffect(() => {
@@ -74,11 +117,19 @@ const App: React.FC = () => {
   }, [page, params]);
 
   return (
-    <Layout activePage={page} onNavigate={navigate} isAuthenticated={isAuthenticated}>
+    <Layout activePage={page} onNavigate={navigate} isAuthenticated={isAuthenticated} cartCount={cartCount}>
       {page === Page.HOME && <Home onNavigate={navigate} />}
       {page === Page.SHOP && <Shop onNavigate={navigate} params={params} />}
-      {page === Page.PRODUCT && <ProductDetail id={params.id} onNavigate={navigate} />}
-      {page === Page.CART && <Cart onNavigate={navigate} isAuthenticated={isAuthenticated} />}
+      {page === Page.PRODUCT && <ProductDetail id={params.id} onNavigate={navigate} addToCart={addToCart} />}
+      {page === Page.CART && (
+        <Cart 
+          onNavigate={navigate} 
+          isAuthenticated={isAuthenticated} 
+          cartItems={cart} 
+          updateQuantity={updateQuantity}
+          removeFromCart={removeFromCart}
+        />
+      )}
       {page === Page.CHECKOUT_SUCCESS && <CheckoutSuccess onNavigate={navigate} />}
       {page === Page.ACCOUNT && <Account onNavigate={navigate} params={params} onLogout={handleLogout} />}
       {page === Page.ABOUT && <About />}

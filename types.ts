@@ -27,6 +27,16 @@ export interface CartItem extends Product {
   selectedColor: string;
 }
 
+export interface PaymentMethod {
+  id: string;
+  cardNumber: string; // Last 4 digits only for display
+  cardholderName: string;
+  expiryMonth: string;
+  expiryYear: string;
+  cardType: 'visa' | 'mastercard' | 'amex' | 'discover' | 'other';
+  isDefault: boolean;
+}
+
 export enum Page {
   HOME = 'home',
   SHOP = 'shop',

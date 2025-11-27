@@ -217,6 +217,11 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [qvSize, setQvSize] = useState('M');
   const [qvColor, setQvColor] = useState('Black');
+  const [qvQuantity, setQvQuantity] = useState(1);
+  const [qvGalleryImages, setQvGalleryImages] = useState<string[]>([]);
+  const [qvActiveImage, setQvActiveImage] = useState<string>('');
+  const [qvTouchStart, setQvTouchStart] = useState<number | null>(null);
+  const [qvTouchEnd, setQvTouchEnd] = useState<number | null>(null);
 
   useEffect(() => {
     setLocalSearchQuery(params?.search || '');
@@ -232,6 +237,31 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Handle Escape key to close Quick View modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && quickViewProduct) {
+        setQuickViewProduct(null);
+      }
+    };
+    
+    if (quickViewProduct) {
+      document.addEventListener('keydown', handleEscapeKey);
+      return () => document.removeEventListener('keydown', handleEscapeKey);
+    }
+  }, [quickViewProduct]);
+
+  // Initialize gallery images when quickViewProduct changes
+  useEffect(() => {
+    if (quickViewProduct) {
+      const initialImages = quickViewProduct.images && quickViewProduct.images.length > 0 
+        ? quickViewProduct.images 
+        : [quickViewProduct.image];
+      setQvGalleryImages(initialImages);
+      setQvActiveImage(initialImages[0]);
+    }
+  }, [quickViewProduct]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -324,12 +354,61 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
     setQuickViewProduct(product);
     setQvColor(product.colors?.[0] || 'Black');
     setQvSize('M');
+    setQvQuantity(1); // Reset quantity when opening quick view
+    
+    // Initialize gallery images
+    const initialImages = product.images && product.images.length > 0 ? product.images : [product.image];
+    setQvGalleryImages(initialImages);
+    setQvActiveImage(initialImages[0]);
+  };
+
+  // Handle swipe gestures for image gallery
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setQvTouchEnd(null);
+    setQvTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setQvTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!qvTouchStart || !qvTouchEnd) return;
+    
+    const distance = qvTouchStart - qvTouchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe || isRightSwipe) {
+      const currentIndex = qvGalleryImages.indexOf(qvActiveImage);
+      if (isLeftSwipe && currentIndex < qvGalleryImages.length - 1) {
+        setQvActiveImage(qvGalleryImages[currentIndex + 1]);
+      }
+      if (isRightSwipe && currentIndex > 0) {
+        setQvActiveImage(qvGalleryImages[currentIndex - 1]);
+      }
+    }
+  };
+
+  const navigateImage = (direction: 'prev' | 'next') => {
+    const currentIndex = qvGalleryImages.indexOf(qvActiveImage);
+    if (direction === 'next' && currentIndex < qvGalleryImages.length - 1) {
+      setQvActiveImage(qvGalleryImages[currentIndex + 1]);
+    } else if (direction === 'prev' && currentIndex > 0) {
+      setQvActiveImage(qvGalleryImages[currentIndex - 1]);
+    }
   };
 
   const handleQuickViewAddToCart = () => {
     if (quickViewProduct && addToCart) {
-      addToCart(quickViewProduct, qvSize, qvColor);
+      // Add the item qvQuantity times
+      for (let i = 0; i < qvQuantity; i++) {
+        addToCart(quickViewProduct, qvSize, qvColor);
+      }
       setQuickViewProduct(null);
+      setQvQuantity(1); // Reset quantity after adding
     }
   };
 
@@ -544,12 +623,77 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
       <Modal isOpen={!!quickViewProduct} onClose={() => setQuickViewProduct(null)}>
         {quickViewProduct && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-10">
-            <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden">
-               <img src={quickViewProduct.image} alt={quickViewProduct.name} className="w-full h-full object-cover" />
+            <div className="space-y-4">
+              {/* Main Image with Swipe Support */}
+              <div 
+                className="relative aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden group"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+              >
+                <img 
+                  src={qvActiveImage || quickViewProduct.image} 
+                  alt={quickViewProduct.name} 
+                  className="w-full h-full object-cover transition-opacity duration-300" 
+                />
+                
+                {/* Navigation Arrows (Desktop) */}
+                {qvGalleryImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => navigateImage('prev')}
+                      disabled={qvGalleryImages.indexOf(qvActiveImage) === 0}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 disabled:cursor-not-allowed shadow-lg"
+                      aria-label="Previous image"
+                    >
+                      <span className="material-symbols-outlined text-xl">chevron_left</span>
+                    </button>
+                    <button
+                      onClick={() => navigateImage('next')}
+                      disabled={qvGalleryImages.indexOf(qvActiveImage) === qvGalleryImages.length - 1}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 disabled:cursor-not-allowed shadow-lg"
+                      aria-label="Next image"
+                    >
+                      <span className="material-symbols-outlined text-xl">chevron_right</span>
+                    </button>
+                  </>
+                )}
+              </div>
+              
+              {/* Thumbnail Navigation */}
+              {qvGalleryImages.length > 1 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {qvGalleryImages.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setQvActiveImage(img)}
+                      className={`aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden border-2 transition-all ${
+                        qvActiveImage === img 
+                          ? 'border-black scale-105' 
+                          : 'border-transparent hover:border-gray-300'
+                      }`}
+                      aria-label={`View image ${i + 1}`}
+                    >
+                      <img 
+                        src={img} 
+                        alt={`${quickViewProduct.name} view ${i + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="flex flex-col">
                <h2 className="text-2xl font-serif font-bold mb-2">{quickViewProduct.name}</h2>
-               <p className="text-xl font-medium mb-4">{formatCurrency(quickViewProduct.price)}</p>
+               <p className="text-xl font-medium mb-4">
+                 {formatCurrency(quickViewProduct.price * qvQuantity)}
+                 {qvQuantity > 1 && (
+                   <span className="text-sm text-gray-500 ml-2">
+                     ({formatCurrency(quickViewProduct.price)} × {qvQuantity})
+                   </span>
+                 )}
+               </p>
                <p className="text-gray-600 mb-6 text-sm leading-relaxed">
                  {quickViewProduct.description && quickViewProduct.description.length > 150 
                    ? `${quickViewProduct.description.substring(0, 150)}...` 
@@ -583,6 +727,27 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
                           {s}
                         </button>
                       ))}
+                   </div>
+                 </div>
+                 <div>
+                   <span className="block text-sm font-bold mb-2">Quantity</span>
+                   <div className="flex items-center gap-3">
+                     <button
+                       onClick={() => setQvQuantity(Math.max(1, qvQuantity - 1))}
+                       className="w-10 h-10 border border-gray-200 rounded hover:bg-gray-50 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                       disabled={qvQuantity <= 1}
+                       aria-label="Decrease quantity"
+                     >
+                       <span className="material-symbols-outlined text-lg">remove</span>
+                     </button>
+                     <span className="text-sm font-medium w-8 text-center">{qvQuantity}</span>
+                     <button
+                       onClick={() => setQvQuantity(qvQuantity + 1)}
+                       className="w-10 h-10 border border-gray-200 rounded hover:bg-gray-50 flex items-center justify-center"
+                       aria-label="Increase quantity"
+                     >
+                       <span className="material-symbols-outlined text-lg">add</span>
+                     </button>
                    </div>
                  </div>
                </div>

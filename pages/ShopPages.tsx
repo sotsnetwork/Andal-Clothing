@@ -474,9 +474,10 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
                     <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex gap-2">
                       <Button 
                         variant="secondary" 
-                        className="flex-1 h-10 text-sm shadow-lg" 
+                        className="flex-1 h-10 text-sm shadow-lg flex items-center justify-center gap-2" 
                         onClick={(e) => openQuickView(e, product)}
                       >
+                        <span className="material-symbols-outlined text-lg">visibility</span>
                         Quick View
                       </Button>
                     </div>
@@ -529,7 +530,11 @@ export const Shop: React.FC<ShopProps> = ({ onNavigate, params, wishlist, toggle
             <div className="flex flex-col">
                <h2 className="text-2xl font-serif font-bold mb-2">{quickViewProduct.name}</h2>
                <p className="text-xl font-medium mb-4">{formatCurrency(quickViewProduct.price)}</p>
-               <p className="text-gray-600 mb-6 text-sm leading-relaxed">{quickViewProduct.description}</p>
+               <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+                 {quickViewProduct.description && quickViewProduct.description.length > 150 
+                   ? `${quickViewProduct.description.substring(0, 150)}...` 
+                   : quickViewProduct.description}
+               </p>
                
                <div className="space-y-4 mb-8">
                  <div>

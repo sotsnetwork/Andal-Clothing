@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Page } from '../types';
 import { Button, Input } from '../components/Shared';
 
@@ -115,6 +115,28 @@ export const SignUp: React.FC<AuthProps> = ({ onNavigate, onLogin }) => {
 };
 
 export const ForgotPassword: React.FC<AuthProps> = ({ onNavigate }) => {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md space-y-8 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="material-symbols-outlined text-3xl text-green-600">mark_email_read</span>
+          </div>
+          <div>
+            <h1 className="text-3xl font-serif font-bold mb-2">Check Your Email</h1>
+            <p className="text-gray-600 mb-6">We have sent a password reset link to your email address.</p>
+          </div>
+          <Button onClick={() => onNavigate(Page.LOGIN)} className="w-full">Return to Sign In</Button>
+          <button onClick={() => setIsSubmitted(false)} className="text-sm text-gray-500 hover:text-black mt-4">
+            Didn't receive the email? Click to retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md space-y-8 text-center">
@@ -126,7 +148,7 @@ export const ForgotPassword: React.FC<AuthProps> = ({ onNavigate }) => {
           <p className="text-gray-600">Enter your email address and we'll send you a link to reset your password.</p>
         </div>
         
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); onNavigate(Page.NEW_PASSWORD); }}>
+        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setIsSubmitted(true); }}>
           <div className="text-left">
             <label className="block text-sm font-medium mb-2">Email Address</label>
             <Input type="email" placeholder="Enter your email" required />
